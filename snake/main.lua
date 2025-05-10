@@ -16,6 +16,7 @@ STARTING_POS = {
 is_game_over = false
 
 require 'Snake' -- Import the snake class
+require 'Food' -- Import the food class
 
 function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest') -- Set the default filter for graphics
@@ -32,6 +33,7 @@ function love.load()
     -- setup Snake body, snake head
     is_game_over = false -- Flag to check if the game is over
     snake = Snake(STARTING_POS.x, STARTING_POS.y) -- Create a new snake object
+    food = Food() -- Create a new food object
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
@@ -90,6 +92,7 @@ function love.update(dt)
         lastUpdate = love.timer.getTime() -- Update the last update time
         -- Update game logic
         snake:update(dt) -- Call the update function of the snake object
+        snake:eat(food) -- Call the eat function of the snake object
 
         love.keyboard.keysPressed = {}
         love.mouse.buttonsPressed = {}
@@ -106,6 +109,7 @@ function love.draw()
     love.graphics.clear(0.1, 0.1, 0.1, 1) -- Clear the screen with dark grey color
 
     -- Render game objects
+    food:render() -- Call the render function of the food object
     snake:render() -- Call the render function of the snake object
 
     -- displayTitle()
