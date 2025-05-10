@@ -13,6 +13,8 @@ STARTING_POS = {
     y = VIRTUAL_HEIGHT / 2
 } -- Starting position of the snake head
 
+is_game_over = false
+
 require 'Snake' -- Import the snake class
 
 function love.load()
@@ -30,21 +32,50 @@ function love.load()
     -- setup Snake body, snake head
     is_game_over = false -- Flag to check if the game is over
     snake = Snake(STARTING_POS.x, STARTING_POS.y) -- Create a new snake object
-    
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
         resizable = true,
         vsync = true
     }) -- Setup the screen using push
+    
+    love.keyboard.keysPressed = {}
+    love.mouse.mousePressed = {} -- Table to track mouse presses
+end
 
+function love.keypressed(key)
+    -- add to our table of keys pressed this frame
+    love.keyboard.keysPressed[key] = true
+
+    if key == 'escape' then
+        love.event.quit()
+    end
+end
+
+--[[
+    LÖVE2D callback fired each time a mouse button is pressed; gives us the
+    X and Y of the mouse, as well as the button in question.
+]]
+function love.mousepressed(x, y, button)
+    love.mouse.buttonsPressed[button] = true
+end
+
+function love.keyboard.wasPressed(key)
+    return love.keyboard.keysPressed[key]
+end
+
+--[[
+    Equivalent to our keyboard function from before, but for the mouse buttons.
+]]
+function love.mouse.wasPressed(button)
+    return love.mouse.buttonsPressed[button]
 end
 
 function love.update(dt)
-    if love.keyboard.isDown('escape') then -- If the escape key is pressed
+    if love.keyboard.wasPressed('escape') then -- If the escape key is pressed
         love.event.quit() -- Quit the game
     end
-    if love.keyboard.isDown('r') then -- If the 'r' key is pressed
+    if love.keyboard.wasPressed('r') then -- If the 'r' key is pressed
         is_game_over = false -- Reset the game over flag
     end
 
@@ -57,12 +88,15 @@ function love.update(dt)
     -- limit the frame rate to 60 FPS
     if love.timer.getTime() - lastUpdate > 1 / 10 then -- Check if the time since the last update is greater than 1/60 seconds
         lastUpdate = love.timer.getTime() -- Update the last update time
+        -- Update game logic
+        snake:update(dt) -- Call the update function of the snake object
+
+        love.keyboard.keysPressed = {}
+        love.mouse.buttonsPressed = {}
     else
         return -- If not, return to limit the frame rate
     end
 
-    -- Update game logic
-    snake:update(dt) -- Call the update function of the snake object
 end
 
 function love.draw()
@@ -78,7 +112,6 @@ function love.draw()
     displayFPS()
     push:apply("end") -- End the push library
 end
-
 
 function displayTitle()
     love.graphics.setFont(bigFont) -- Set the font to bigFont

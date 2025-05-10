@@ -1,9 +1,8 @@
 -- local class = require("class")
-Snake = Class{} 
+Snake = Class {}
 
 local SNAKE_SIZE = 10 -- Size of each segment of the snake
 local STARTING_LENGTH = 5 -- Starting length of the snake
-
 
 function Snake:init(x, y)
     self.x = x or 0
@@ -24,26 +23,39 @@ function Snake:init(x, y)
     end
 end
 
+function Snake:collide(self) -- Check for collision with the snake body
+    for i = 2, #self.body do -- Iterate through the self.body segments starting from the second segment
+        if self.body[1].x == self.body[i].x and self.body[1].y == self.body[i].y then -- If the head collides with any segment
+            return true -- Set the game over flag to true
+        end
+    end
+    return false -- Return false if no collision is detected
+end
 
-function Snake:update(dt)
-    -- handle input 
-    if (love.keyboard.isDown('up') or love.keyboard.isDown('k')) and self.direction ~= 'down' then -- If the up key is pressed and the snake is not moving down
+function handleInput(self) -- Handle input for the snake
+    if (love.keyboard.wasPressed('up')) and self.direction ~= 'down' then -- If the up key is pressed and the snake is not moving down
         self.direction = 'up'
-    elseif (love.keyboard.isDown('j') or love.keyboard.isDown('down')) and self.direction ~= 'up' then -- If the down key is pressed and the snake is not moving up
+    elseif (love.keyboard.wasPressed('down')) and self.direction ~= 'up' then -- If the down key is pressed and the snake is not moving up
         self.direction = 'down'
-    elseif (love.keyboard.isDown('h') or love.keyboard.isDown('left')) and self.direction ~= 'right' then -- If the left key is pressed and the snake is not moving right
+    elseif (love.keyboard.wasPressed('left')) and self.direction ~= 'right' then -- If the left key is pressed and the snake is not moving right
         self.direction = 'left'
-    elseif (love.keyboard.isDown('l') or love.keyboard.isDown('right')) and self.direction ~= 'left' then -- If the right key is pressed and the snake is not moving left
+    elseif (love.keyboard.wasPressed('right')) and self.direction ~= 'left' then -- If the right key is pressed and the snake is not moving left
         self.direction = 'right'
     end
+end
 
-    -- move the body
+function moveBody(self) -- Move the body of the snake
+    -- if (is is growind)
+    -- parti dal terzo
+    -- else
     for i = #self.body, 2, -1 do -- Iterate through the self.body segments from the end to the beginning
         self.body[i].x = self.body[i - 1].x -- Set the x position of the current segment to the x position of the previous segment
         self.body[i].y = self.body[i - 1].y -- Set the y position of the current segment to the y position of the previous segment
     end
+end
 
-    -- move the head
+function moveHead(self)
+
     if self.direction == 'up' then -- If the self.directory is up
         self.body[1].y = self.body[1].y - SNAKE_SIZE -- % VIR  Move the head up
         if self.body[1].y < 0 then -- If the head goes out of bounds
@@ -61,15 +73,23 @@ function Snake:update(dt)
     elseif self.direction == 'right' then -- If the self.directory is right
         self.body[1].x = (self.body[1].x + SNAKE_SIZE) % VIRTUAL_WIDTH -- Move the head right
     end
-
-    -- check for collision with the body
-    -- for i = 2, #self.body do -- Iterate through the self.body segments starting from the second segment
-    --     if self.body[1].x == self.body[i].x and self.body[1].y == self.body[i].y then -- If the head collides with any segment
-    --         is_game_over = true -- Set the game over flag to true
-    --     end
-    -- end
 end
 
+function Snake:update(dt)
+
+    if Snake:collide(self) then -- Check for collision with the snake body
+        is_game_over = true -- Set the game over flag to true
+    end
+
+    if is_game_over then -- If the game is over
+        return -- Return to stop updating the snake
+    end
+
+    handleInput(self) -- Call the handleInput function to update the snake's direction
+    moveBody(self) -- Call the moveBody function to update the snake's body
+    moveHead(self) -- Call the moveHead function to update the snake's head
+
+end
 
 function Snake:render()
     for i, segment in ipairs(self.body) do -- Iterate through each segment of the snake
