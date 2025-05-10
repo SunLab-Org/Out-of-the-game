@@ -8,29 +8,12 @@ VIRTUAL_HEIGHT = 200 -- Virtual height of the game window
 WINDOW_WIDTH = 1280 -- Actual width of the game window
 WINDOW_HEIGHT = 720 -- Actual height of the game window
 
-STARTING_LENGTH = 5 -- Starting length of the snake
-SNAKE_SIZE = 10 -- Size of each segment of the snake
 STARTING_POS = {
     x = VIRTUAL_WIDTH / 2,
     y = VIRTUAL_HEIGHT / 2
 } -- Starting position of the snake head
 
-direction = 'right' -- Initial direction of the snake
-snake = {} -- Table to hold the snake segments
-
-function setupSnake() -- Function to setup the snake
-    -- reset direction
-    direction = 'right'
-    
-    -- reset snake body
-    snake = {} -- Initialize the snake table
-    for i = 1, STARTING_LENGTH do -- from 1 to STARTING_LENGTH 
-        table.insert(snake, { -- Insert a new segment into the snake table
-            x = STARTING_POS.x - (i * SNAKE_SIZE), -- Calculate the x position of the segment
-            y = STARTING_POS.y -- Set the y position of the segment
-        })
-    end
-end
+require 'Snake' -- Import the snake class
 
 function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest') -- Set the default filter for graphics
@@ -46,7 +29,8 @@ function love.load()
 
     -- setup Snake body, snake head
     is_game_over = false -- Flag to check if the game is over
-    setupSnake() -- Call the function to setup the snake
+    snake = Snake(STARTING_POS.x, STARTING_POS.y) -- Create a new snake object
+    
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
@@ -66,7 +50,7 @@ function love.update(dt)
 
     if is_game_over then -- If the game is over
         -- is_game_over = false -- Reset the game over flag
-        setupSnake() -- Call the function to setup the snake again
+        snake = Snake(STARTING_POS.x, STARTING_POS.y) -- Create a new snake object
         return
     end
 
@@ -78,46 +62,7 @@ function love.update(dt)
     end
 
     -- Update game logic
-    -- handle input 
-    if love.keyboard.isDown('up') and direction ~= 'down' then -- If the up key is pressed and the snake is not moving down
-        direction = 'up' -- Change direction to up
-    elseif love.keyboard.isDown('down') and direction ~= 'up' then -- If the down key is pressed and the snake is not moving up
-        direction = 'down' -- Change direction to down
-    elseif love.keyboard.isDown('left') and direction ~= 'right' then -- If the left key is pressed and the snake is not moving right
-        direction = 'left' -- Change direction to left
-    elseif love.keyboard.isDown('right') and direction ~= 'left' then -- If the right key is pressed and the snake is not moving left
-        direction = 'right' -- Change direction to right
-    end
-
-    -- move the body
-    for i = #snake, 2, -1 do -- Iterate through the snake segments from the end to the beginning
-        snake[i].x = snake[i - 1].x -- Set the x position of the current segment to the x position of the previous segment
-        snake[i].y = snake[i - 1].y -- Set the y position of the current segment to the y position of the previous segment
-    end
-
-    -- move the head
-    if direction == 'up' then -- If the direction is up
-        snake[1].y = snake[1].y - SNAKE_SIZE -- % VIR  Move the head up
-        if snake[1].y < 0 then -- If the head goes out of bounds
-            snake[1].y = VIRTUAL_HEIGHT - SNAKE_SIZE -- Wrap around to the bottom 
-        end
-    elseif direction == 'down' then -- If the direction is down
-        snake[1].y = (snake[1].y + SNAKE_SIZE) % VIRTUAL_HEIGHT -- Move the head down
-    elseif direction == 'left' then -- If the direction is left
-        snake[1].x = snake[1].x - SNAKE_SIZE -- Move the head left
-        if snake[1].x < 0 then -- If
-            snake[1].x = VIRTUAL_WIDTH - SNAKE_SIZE -- Wrap around to the right
-        end
-    elseif direction == 'right' then -- If the direction is right
-        snake[1].x = (snake[1].x + SNAKE_SIZE) % VIRTUAL_WIDTH -- Move the head right
-    end
-
-    -- check for collision with the body
-    for i = 2, #snake do -- Iterate through the snake segments starting from the second segment
-        if snake[1].x == snake[i].x and snake[1].y == snake[i].y then -- If the head collides with any segment
-            is_game_over = true -- Set the game over flag to true
-        end
-    end
+    snake:update(dt) -- Call the update function of the snake object
 end
 
 function love.draw()
@@ -127,20 +72,13 @@ function love.draw()
     love.graphics.clear(0.1, 0.1, 0.1, 1) -- Clear the screen with dark grey color
 
     -- Render game objects
-    displaySnake() -- Call the function to display the snake
+    snake:render() -- Call the render function of the snake object
 
     -- displayTitle()
     displayFPS()
     push:apply("end") -- End the push library
 end
 
-function displaySnake()
-    -- Display the snake on the screen
-    for i, segment in ipairs(snake) do -- Iterate through each segment of the snake
-        love.graphics.setColor(0, 255, 0, 255) -- Set color to green
-        love.graphics.rectangle('fill', segment.x, segment.y, SNAKE_SIZE, SNAKE_SIZE) -- Draw each segment as a rectangle
-    end
-end
 
 function displayTitle()
     love.graphics.setFont(bigFont) -- Set the font to bigFont
