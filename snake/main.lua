@@ -92,6 +92,7 @@ function love.update(dt)
 
     -- limit the frame rate to 60 FPS
     if love.timer.getTime() - lastUpdate > 1 / 10 then -- Check if the time since the last update is greater than 1/60 seconds
+        print('debugging')
         lastUpdate = love.timer.getTime() -- Update the last update time
         -- Update game logic
         snake:update(dt) -- Call the update function of the snake object
