@@ -14,6 +14,7 @@ STARTING_POS = {
 } -- Starting position of the snake head
 
 is_game_over = false
+highscore = 0 -- Variable to track the high score
 
 require 'Snake' -- Import the snake class
 require 'Food' -- Import the food class
@@ -81,6 +82,8 @@ function love.update(dt)
         is_game_over = false -- Reset the game over flag
     end
 
+    highscore = math.max(highscore, (snake.length - 5) * 10) -- Update the high score based on the snake length
+
     if is_game_over then -- If the game is over
         -- is_game_over = false -- Reset the game over flag
         snake = Snake(STARTING_POS.x, STARTING_POS.y) -- Create a new snake object
@@ -107,21 +110,26 @@ function love.draw()
 
     -- render background
     love.graphics.clear(0.1, 0.1, 0.1, 1) -- Clear the screen with dark grey color
+    displayFPS()
+    displayPoints()
 
     -- Render game objects
     food:render() -- Call the render function of the food object
     snake:render() -- Call the render function of the snake object
 
     -- displayTitle()
-    displayFPS()
     push:apply("end") -- End the push library
 end
 
-function displayTitle()
-    love.graphics.setFont(bigFont) -- Set the font to bigFont
-    love.graphics.print("Welcome to Snake Game!", VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, 0, 1, 1,
-        bigFont:getWidth("Welcome to Snake Game!") / 2, bigFont:getHeight() / 2) -- Print the welcome message
+function displayPoints()
+    text = "Points: " .. (snake.length - 5 ) * 10-- Create a string with the points
+    love.graphics.setFont(smallFont) -- Set the font to bigFont
+    love.graphics.print(text, VIRTUAL_WIDTH - 80, 10 )
+        
 
+    text = "Highscore: " .. highscore-- Create a string with the points
+    love.graphics.setFont(smallFont) -- Set the font to bigFont
+    love.graphics.print(text, VIRTUAL_WIDTH -80, 20 ) 
 end
 
 function displayFPS()
