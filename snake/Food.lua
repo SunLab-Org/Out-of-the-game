@@ -5,16 +5,20 @@ local FOOD_SIZE = 10 -- Size of the food
 
 
 function Food:init()
-    self.x = math.random(0, VIRTUAL_WIDTH - FOOD_SIZE) -- Generate a random x position for the food
-    self.y = math.random(0, VIRTUAL_HEIGHT - FOOD_SIZE) -- Generate a random y position for the food
+    x = math.random(0, VIRTUAL_WIDTH - FOOD_SIZE)
+    y = math.random(0, VIRTUAL_HEIGHT - FOOD_SIZE)
+    self.x = x - x%FOOD_SIZE -- Align the x position to the grid``
+    self.y = y - y%FOOD_SIZE -- Align the y position to the grid
     self.width = FOOD_SIZE
     self.height = FOOD_SIZE
 end
 
 
 function Food:reset() -- Reset the food position
-    self.x = math.random(0, VIRTUAL_WIDTH - FOOD_SIZE) -- Generate a random x position for the food
-    self.y = math.random(0, VIRTUAL_HEIGHT - FOOD_SIZE) -- Generate a random y position for the food
+    x = math.random(0, VIRTUAL_WIDTH - FOOD_SIZE)
+    y = math.random(0, VIRTUAL_HEIGHT - FOOD_SIZE)
+    self.x = x - x%FOOD_SIZE -- Align the x position to the grid``
+    self.y = y - y%FOOD_SIZE -- Align the y position to the grid
 end
 
 
