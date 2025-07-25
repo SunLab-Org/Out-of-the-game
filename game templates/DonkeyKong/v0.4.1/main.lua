@@ -4,12 +4,7 @@ local love = require "love"
     Obiettivi: 
     - migliorare il sistema di collisioni
     
-    Questa parte e' essenzialmente opzionale, in quanto il gioco nella maggiorparte dei casi funziona bene, tuttavia
-    se vogliamo essere minuziosi dovremmo aggiungere un sistema che non permetta la compenetrazione dei corpi
-
-    Abbiamo visto come se un corpo arriva abbastanza veloce, prima che il codice riesca a capire che e' compenetrato questo
-    si compenetra ulteriormente. In questo caso vogliamo spostarlo verso l'esterno immediatamente, in modo che non ci siano
-    problemi durante il calcolo delle normali
+    in questa seconda parte miglioriamo il nostro approccio per funzionare meglio
 ]]
  
 local playerGenerator = require "player"
@@ -52,6 +47,13 @@ end
 
 function Game.checkCollision(a, b)
     if a == b then return nil end
+    --[[
+        nella parte precedente abbiamo deciso di considerare il centro dei nostri corpi per calcolare la collisione, tuttavia questo
+        non funziona sempre, anzi tende a non funzionare quando un corpo molto grande si scontra con un corpo molto piccolo per esempio
+
+        una strategia migliore sarebbe non considerare il centro dell'oggetto stesso ma il centro dell'area che sta toccando
+        l'altro oggetto
+    ]]
 
     local collides =    a.x - a.width / 2 < b.x + b.width / 2 and
                         a.x + a.width / 2 > b.x - b.width / 2 and
@@ -59,32 +61,7 @@ function Game.checkCollision(a, b)
                         a.y + a.height / 2 > b.y - b.height / 2
 
     if collides == true then
-<<<<<<< HEAD
-        local overlap = Game.centerCollision(a,b)
-        
-        local coll = {}
-
-        coll.normal = {nx = 0, ny = 0}
-   
-        if overlap.height > overlap.width then
-            if overlap.cx > b.x then
-                coll.normal.nx = 1
-            else
-                coll.normal.nx = -1
-            end
-            coll.normal.ny = 0
-        else
-            if overlap.cy > b.y then
-                coll.normal.ny = 1
-            else
-                coll.normal.ny = -1
-            end
-            coll.normal.nx = 0
-        end
-
-
-        Game.transpose(a, overlap)
-=======
+        --inizializziamo i valori al centro dell'pggetto che collide
         local cx, cy = Game.centerCollision(a,b)
 
         local coll = {}
@@ -117,7 +94,6 @@ function Game.checkCollision(a, b)
             coll.normal.nx = 1
             coll.normal.ny = 0
         end
->>>>>>> 20b1a4ee29bd8562b129c0e9c872f943d945a330
         
         return coll
     else
@@ -126,14 +102,12 @@ function Game.checkCollision(a, b)
 
 end
 
-<<<<<<< HEAD
-=======
 --[[
-    nella funzione che calcola il centro di collisione potremmo muovere il giocatore in modo da avvicinarlo al lato migliore,
-    ovvero il piu' vicino
+    questa funzione prende i due corpi a e b e ne calcola il centro della sovrapposizione,
+    il concetto e' semplicemente tenere buono il lato del corpo che si sta sovrapponendo
+    Una spiegazione piu' dettagliata negli apunti che trovate nella cartella
 ]]
 
->>>>>>> 20b1a4ee29bd8562b129c0e9c872f943d945a330
 function Game.centerCollision(a,b)
     local a_left   = a.x - a.width / 2
     local a_right  = a.x + a.width / 2
@@ -145,77 +119,22 @@ function Game.centerCollision(a,b)
     local b_top    = b.y - b.height / 2
     local b_bottom = b.y + b.height / 2
 
-<<<<<<< HEAD
-=======
-    -- calcolo la distanza tra i lati
-    local diff_left = (a_left - b_right >= 0) and a_left - b_right or 100000
-    local diff_right = (a_right - b_left >= 0) and a_right - b_left or 100000
-    local diff_top = (a_top - b_bottom >= 0) and a_top - b_bottom or 100000
-    local diff_bottom = (a_bottom - b_top >= 0) and a_bottom - b_top or 100000
-
-
-    -- prendo la minima differenza
-    local min_diff = math.min(diff_left, diff_right, diff_top, diff_bottom)
-
-    -- sposto lievemente il corpo in modo da chiarificare la collisione
-    -- variare l'ordine provoca comportamenti diversi in casi di parita'
-    if min_diff == diff_left then
-        -- su right e left ho aggiunto 1 pixel per evitare dei glitch, potete sperimentare togliendolo ;D
-        a.x = a.x + diff_left - 1
-    elseif min_diff == diff_right then
-        a.x = a.x - diff_right + 1
-    elseif min_diff == diff_top then
-        a.y = a.y + diff_top
-    else
-        a.y = a.y - diff_bottom
-    end
-
-
->>>>>>> 20b1a4ee29bd8562b129c0e9c872f943d945a330
     local overlap_left   = math.max(a_left, b_left)
     local overlap_right  = math.min(a_right, b_right)
     local overlap_top    = math.max(a_top, b_top)
     local overlap_bottom = math.min(a_bottom, b_bottom)
 
-    
-
     local centerX = (overlap_left + overlap_right) / 2
     local centerY = (overlap_top + overlap_bottom) / 2
-<<<<<<< HEAD
-    local width = overlap_right - overlap_left
-    local height = overlap_bottom - overlap_top
-
-    return {
-        cx = centerX, 
-        cy = centerY,
-        width = width,
-        height = height
-    }
-        
-
-end
-
-function Game.transpose(a, overlap)
-    local dx = a.x - overlap.cx
-    local dy = a.y - overlap.cy
-
-    if overlap.width < overlap.height then
-        a.x = a.x + ( 1 + overlap.width) * (dx / math.abs(dx))
-    else
-        a.y = a.y + overlap.height * (dy / math.abs(dy))
-    end
-end
-
-=======
 
     return centerX, centerY
 
 end
 
->>>>>>> 20b1a4ee29bd8562b129c0e9c872f943d945a330
 --[[
-    ora possiamo dire che il sistema di collisioni e' ultimato, questa parte seppur molto complessa e' fondamentale
-    e generale per lo sviluppo di molti giochi, pertanto ritengo pertinente coprirla a fondo
+    A questo punto il nostro sistema di collisioni e' quasi perfetto, andrebbero pero' apportate alcune modifiche
+    perche' per il momento non gestisce alcune particolari collisioni ( per esempio quando un corpo spawn all'interno di un
+    altro ) che possiamo opzionalmente migliorare
 ]]
 
 function love.keypressed(key)

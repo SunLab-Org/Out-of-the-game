@@ -1,72 +1,70 @@
 local love = require "love"
 
 --[[
-    Questa e' un passaggio molto delicato del nostro codice, in sostanza siamo davanti
-    ad una prima modularizzazione del codice, parolona che fa molta paura ma che in realta'
-    e' molto semplice da capire.
-
-    Abbiamo spostato tutto il codice di player in un file a parte, e abbiamo creato una 
-    funzione Player.new() questa funzione fa quello che facevamo in main, ma poi restituisce
-    il player
+    Questo e' un modo semplice per riutilizzare il codice in lua, ogni volta che vorremmo un nuovo player
+    bastera' chiamare la funzione Player.new() e passare i parametri riciesti, per il resto non cambiamo nulla a livello di codice
 ]]
 
 local Player = {}
+Player.__index = Player
 
-function Player.new(x, y, width, height)
-    -- creo il player come nel main
-    local player = {
-        x = x,
-        y = y,
-        width = width,
-        height = height,
-        speed = 100,
-        Vx = 0,
-        Vy = 0,
+function Player.new(x,y,width,height, speed)
+    local self = setmetatable({}, { __index = Player })
+    self.x = x
+    self.y = y
+    self.width = width
+    self.height = height
+    self.speed = speed
+    self.Vx = 0
+    self.Vy = 0
 
-        -- ho aggiunto questa variabile che ci dice se il player e' a terra o no
-        onGround = false
-    }
+    -- prima andare avanti nel main, questa viene spiegata dopo :D
+    self.onGround = false
+    return self
+end
 
-    function player:draw()
-        love.graphics.setColor(1, 0.5, 0)
-        love.graphics.rectangle("fill", player.x - player.width / 2, player.y - player.height / 2, player.width, player.height)
+
+function Player:draw()
+    love.graphics.setColor(1, 0.5, 0)
+    love.graphics.rectangle("fill", self.x - self.width / 2, self.y - self.height / 2, self.width, self.height)
+end
+
+function Player:update(dt)
+    if love.keyboard.isDown("a","left") then
+        self.x = self.x - self.speed * dt
+    end
+    if love.keyboard.isDown("d","right") then
+        self.x = self.x + self.speed * dt
     end
 
-    function player:update(dt)
-        if love.keyboard.isDown("a","left") then
-            player.x = player.x - player.speed * dt
-        end
-        if love.keyboard.isDown("d","right") then
-            player.x = player.x + player.speed * dt
-        end
+    --[[
+        Questa parte deve essere modificata, per il momento potremmo semplicemente scorrere tutta la tabella delle entita'
+        e cercare se c'e' almeno una collisione
+        creiamo una variabile player.onGround, che sta a significare che il player e' a terra
+        qui, creiamo un ciclo che checka se esiste almeno una collisione
+    ]]
+
+    -- supponiao non ce ne siano
+    self.onGround = false
     
-        -- utilizzo la nuova variabile per capire se il player e' a terra
-        if not player.onGround then
-            player.y = player.y + player.Vy * dt + Game.physics.gravity / 2 * dt * dt
-            player.Vy = player.Vy + Game.physics.gravity * dt
-        else
-            player.Vy = 0
+    for _,i in pairs(Game.entities) do
+        -- se c'e' una collisione, allora il player e' a terra
+        if i ~= self and Game.checkCollision(self, i) then
+            
+            self.onGround = true
+            -- questo serve per fermare il ciclo, apena trovo una collisione
+            break
         end
     end
 
-    -- ho aggiunto questa funzione per controllare se ci sono collisioni tra il player
-    -- e un altro oggetto, che ho chiamato 'other'
-    function player:checkCollision(other)
-        player.onGround = Game.checkCollision(player, other) -- controlla se collidono e assegna il valore a onGround
+    -- qui utilizziamo onGround
+    if not self.onGround then
+        self.y = self.y + self.Vy * dt + Game.physics.gravity / 2 * dt * dt
+        self.Vy = self.Vy + Game.physics.gravity * dt
+    else
+        self.Vy = 0
     end
-
-    return player
 end
 
 return Player
-
---[[
-    Abbiamo fatto una parte importante del lavoro, comprendere questo passaggio e' fondamentale
-    per poter la buona riuscita del nostro gioco e per non ammattire piu' avanti!
-    Nella prossima versione aggiorniamo il sistema di collisioni
-]]
-
-
-
-
 
