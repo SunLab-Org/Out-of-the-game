@@ -34,6 +34,8 @@ function Player:init(player)
 	self.width = self.image:getWidth()
 	self.height = self.image:getHeight()
 
+	self.health = 100
+
 	-- position bird in the middle of the screen
 	self.x = _getX(self.player, self.width)
 	self.y = _getY(self.player, self.height)
@@ -76,6 +78,10 @@ function Player:update(dt)
 		self.x = self.x + self.dx * dt
 	end
 
+	if love.keyboard.wasPressed("h") and self.health > 0 then
+		self.health = self.health - 10
+	end
+
 	-- limit
 	self.x = math.max(0, self.x)
 	self.x = math.min(VIRTUAL_WIDTH - self.width, self.x)
@@ -83,5 +89,31 @@ function Player:update(dt)
 end
 
 function Player:render()
+	-- player
+	love.graphics.setColor(1, 1, 1)
 	love.graphics.draw(self.image, self.x, self.y)
+
+	-- healthbar
+	if self.player == "p1" then
+		x = 10
+	elseif self.player == "p2" then
+		x = VIRTUAL_WIDTH / 2 + 10
+	end
+	-- yellow
+	love.graphics.setColor(1, 1, 0)
+	love.graphics.rectangle("fill", x, 10, VIRTUAL_WIDTH / 2 - 20, 20)
+
+	-- red
+	love.graphics.setColor(1, 0, 0)
+	if self.player == "p1" then
+		love.graphics.rectangle("fill", x, 10, (VIRTUAL_WIDTH / 2 - 20) * (100 - self.health) / 100, 20)
+	elseif self.player == "p2" then
+		love.graphics.rectangle(
+			"fill",
+			VIRTUAL_WIDTH - 10 - (VIRTUAL_WIDTH / 2 - 20) * (100 - self.health) / 100,
+			10,
+			(VIRTUAL_WIDTH / 2 - 20) * (100 - self.health) / 100,
+			20
+		)
+	end
 end
