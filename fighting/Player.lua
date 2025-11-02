@@ -91,7 +91,11 @@ end
 function Player:render()
 	-- player
 	love.graphics.setColor(1, 1, 1)
-	love.graphics.draw(self.image, self.x, self.y)
+	if self.player == "p1" then
+		love.graphics.draw(self.image, self.x, self.y, 0, 1, 1, self.width / 2, self.height / 2)
+	elseif self.player == "p2" then
+		love.graphics.draw(self.image, self.x, self.y, 0, -1, 1, self.width / 2, self.height / 2)
+	end
 
 	-- healthbar
 	if self.player == "p1" then
