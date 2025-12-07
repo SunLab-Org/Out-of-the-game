@@ -1,5 +1,7 @@
-local love = require "love"
-require "gameover"
+local module = {}
+local basePath = "games/LorenzoB/"
+require "games/LorenzoB/gameover"
+
 
 local x = 50
 local y = 50
@@ -22,14 +24,14 @@ love.graphics.setDefaultFilter("nearest", "nearest")
 
 
 local flecie = {}
-local sprite = love.graphics.newImage("flecia.png")
+local sprite = love.graphics.newImage(basePath.."flecia.png")
 
 
 local pollo = {}
-local spritePollo = love.graphics.newImage("pollozombibig.png")
+local spritePollo = love.graphics.newImage(basePath.."pollozombibig.png")
 
 
-local spritesfondo = love.graphics.newImage("sfondo.png")
+local spritesfondo = love.graphics.newImage(basePath.."sfondo.png")
 
 
 function isColliding(f)
@@ -44,15 +46,15 @@ function isColliding(f)
            ay + ah > f.y
 end
 
-function love.load()
+function module.load()
     punti = 0
     record = 0
 
-    music = love.audio.newSource("musica.wav", "static")
+    music = love.audio.newSource(basePath.."musica.wav", "static")
 
 end
 
-function love.update(dt)
+function module.update(dt)
     if GameOver then return end
 
     timer = timer - dt
@@ -128,7 +130,7 @@ function reset()
 end 
 
 
-function love.draw()
+function module.draw()
     GameOverDraw(punti)
     
     if GameOver then return end
@@ -147,9 +149,10 @@ function love.draw()
     
 end
 
-function love.mousepressed(x, y, key)
+function module.mousepressed(x, y, key)
     GameOver_mousepressed(x, y, key, reset)
 end
 
+return module
 
 

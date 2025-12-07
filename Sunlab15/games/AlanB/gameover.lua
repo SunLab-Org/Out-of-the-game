@@ -1,5 +1,3 @@
-local love = require "love"
-
 GameOver = false
 
 local smallFont = love.graphics.newFont(28)
