@@ -1,0 +1,18 @@
+local movimento = 0
+function love.load()
+
+end
+
+function love.update(dt)
+local movimento + 1
+end
+
+Function love.draw()
+print("test")
+print("test2")
+
+local ipad = 100
+local passw = 132-- local altezza = 90
+
+font = love.graphics.newFont(4)
+love.graphics.rectangle("fill" 100, 130, -100, -150 )
