@@ -100,14 +100,56 @@ function love.draw()
 
 	if state == "main_menu" then
 		local t = menuAnim.t or 0
-		-- title
-		local y = VIRTUAL_HEIGHT * 0.1 + math.sin(t * 2) * VIRTUAL_HEIGHT * 0.025
-		local r = 0.5 + 0.5 * math.sin(t)
-		local g = 0.5 + 0.5 * math.sin(t + 2)
-		local b = 0.5 + 0.5 * math.sin(t + 4)
+
+		local fullText = "Sunlab 15"
+		local speed = 10 -- letters per second
+		local letterCount = math.floor(t * speed)
+
 		love.graphics.setFont(fonts["menuTitle"])
-		love.graphics.setColor(r, g, b, 1)
-		love.graphics.printf("Sunlab 15", 0, y, VIRTUAL_WIDTH, "center")
+
+		-- measure the whole string to calculate a starting X for center alignment
+		local totalWidth = fonts["menuTitle"]:getWidth(fullText)
+		local startX = (VIRTUAL_WIDTH - totalWidth) / 2
+		local baseY = VIRTUAL_HEIGHT * 0.1
+
+		for i = 1, math.min(letterCount, #fullText) do
+			local char = fullText:sub(i, i)
+
+			-- position of this letter
+			local x = startX + fonts["menuTitle"]:getWidth(fullText:sub(1, i - 1))
+
+			-- per-letter vertical motion
+			local y = baseY + math.sin(t * 4 + i * 0.4) * (VIRTUAL_HEIGHT * 0.02)
+
+			-- per-letter color variation
+			local r = 0.5 + 0.5 * math.sin(t + i * 0.2)
+			local g = 0.5 + 0.5 * math.sin(t + 2 + i * 0.3)
+			local b = 0.5 + 0.5 * math.sin(t + 4 + i * 0.5)
+
+			love.graphics.setColor(r, g, b, 1)
+			love.graphics.print(char, x, y)
+		end
+
+		-- local t = menuAnim.t or 0
+		-- -- title
+		-- local y = VIRTUAL_HEIGHT * 0.1 + math.sin(t * 2) * VIRTUAL_HEIGHT * 0.025
+		-- local r = 0.5 + 0.5 * math.sin(t)
+		-- local g = 0.5 + 0.5 * math.sin(t + 2)
+		-- local b = 0.5 + 0.5 * math.sin(t + 4)
+		--
+		-- -- text reveal
+		-- local fullText = "Sunlab 15"
+		-- local speed = 10 -- letters per second
+		-- local letters = math.floor(t * speed)
+		-- local visibleText = fullText:sub(1, letters)
+		--
+		-- love.graphics.setFont(fonts["menuTitle"])
+		-- love.graphics.setColor(r, g, b, 1)
+		-- love.graphics.printf(visibleText, 0, y, VIRTUAL_WIDTH, "center")
+
+		-- love.graphics.setFont(fonts["menuTitle"])
+		-- love.graphics.setColor(r, g, b, 1)
+		-- love.graphics.printf("Sunlab 15", 0, y, VIRTUAL_WIDTH, "center")
 
 		-- highlight selected
 		love.graphics.setColor(0.3, 0.4, 0.5)
@@ -177,15 +219,16 @@ end
 
 function drawCredits()
 	local t = menuAnim.t or 0
-	local r = 0.5 + 0.5 * math.sin(t)
-	local g = 0.5 + 0.5 * math.sin(t + 2)
-	local b = 0.5 + 0.5 * math.sin(t + 4)
+	local r = 0.7 + 0.3 * math.sin(t)
+	local g = 0.7 + 0.3 * math.sin(t + 2)
+	local b = 0.7 + 0.3 * math.sin(t + 4)
 	love.graphics.clear(r, g, b, 1)
 	drawFit(logos["tn"], 20, 8, 110, 110)
 	drawFit(logos["politiche"], 160, 9, 80, 80)
 	drawFit(logos["piano"], 250, 8, 105, 105)
 	drawFit(logos["appm"], 380, 30, 130, 130)
 
+	love.graphics.setColor(0, 0, 0)
 	love.graphics.setFont(fonts["menuItem"])
 	love.graphics.printf("Credits", 150, 100, VIRTUAL_WIDTH - 300, "center")
 	love.graphics.setFont(fonts["creditsFont"])
