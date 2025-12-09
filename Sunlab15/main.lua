@@ -9,6 +9,7 @@ WINDOW_HEIGHT = 720 -- Actual height of the game window
 fonts = {}
 sounds = {}
 games = {}
+logos = {}
 state = "main_menu" -- main_menu, select_game, credits, playing, info
 
 -- Sunlab15 Main Game Launcher
@@ -39,8 +40,12 @@ local function scanGames()
 			table.insert(games, {
 				name = name,
 				main = path,
-				image = love.filesystem.getInfo("games/" .. name .. "/cover.png") and love.graphics.newImage("games/" .. name .. "/cover.png") or nil,
-				info = love.filesystem.getInfo("games/" .. name .. "/info.txt") and love.filesystem.read("games/" .. name .. "/info.txt") or "No info available."
+				image = love.filesystem.getInfo("games/" .. name .. "/cover.png") and love.graphics.newImage(
+					"games/" .. name .. "/cover.png"
+				) or nil,
+				info = love.filesystem.getInfo("games/" .. name .. "/info.txt") and love.filesystem.read(
+					"games/" .. name .. "/info.txt"
+				) or "No info available.",
 			})
 		end
 	end
@@ -51,23 +56,30 @@ function returnToSelection()
 	minigameModule = nil
 end
 
+function loadLogos()
+	logos["appm"] = love.graphics.newImage("assets/logoAPPM.png")
+	logos["piano"] = love.graphics.newImage("assets/pgdz.png")
+	logos["politiche"] = love.graphics.newImage("assets/politiche.png")
+	logos["tn"] = love.graphics.newImage("assets/pat.png")
+end
+
 function love.load()
 	scanGames()
 	loadFonts()
 	loadSounds()
-	menuAnim = {t = 0}
-
+	loadLogos()
+	menuAnim = { t = 0 }
 
 	push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
 		fullscreen = true,
 		resizable = true,
 		vsync = true,
 		canvas = false,
-	}) 
+	})
 end
 
 function love.update(dt)
-	if state == "main_menu" then
+	if state == "main_menu" or state == "credits" then
 		menuAnim.t = menuAnim.t + dt
 	end
 
@@ -83,95 +95,108 @@ function love.resize(w, h)
 end
 
 function love.draw()
-	push:start() 
+	push:start()
 	love.graphics.clear(0.1, 0.1, 0.1, 1)
 
 	if state == "main_menu" then
 		local t = menuAnim.t or 0
-		-- title 
-		local y = VIRTUAL_HEIGHT*0.1 + math.sin(t*2)*VIRTUAL_HEIGHT*0.025
-		local r = 0.5+0.5*math.sin(t)
-		local g = 0.5+0.5*math.sin(t+2)
-		local b = 0.5+0.5*math.sin(t+4)
+		-- title
+		local y = VIRTUAL_HEIGHT * 0.1 + math.sin(t * 2) * VIRTUAL_HEIGHT * 0.025
+		local r = 0.5 + 0.5 * math.sin(t)
+		local g = 0.5 + 0.5 * math.sin(t + 2)
+		local b = 0.5 + 0.5 * math.sin(t + 4)
 		love.graphics.setFont(fonts["menuTitle"])
 		love.graphics.setColor(r, g, b, 1)
 		love.graphics.printf("Sunlab 15", 0, y, VIRTUAL_WIDTH, "center")
 
 		-- highlight selected
-		love.graphics.setColor(0.3, 0.4, 0.5 )
-		love.graphics.rectangle(
-			"fill", 
-			0,
-			100 + (selected * 80),
-			VIRTUAL_WIDTH, 
-			80
-		)
+		love.graphics.setColor(0.3, 0.4, 0.5)
+		love.graphics.rectangle("fill", 0, 100 + (selected * 80), VIRTUAL_WIDTH, 80)
 
 		-- menu items
-		love.graphics.setColor(1,1,1,1)
+		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.setFont(fonts["menuItem"])
-		love.graphics.printf("Start", 0, 200, VIRTUAL_WIDTH , "center")
-		love.graphics.printf("Credits", 0, 280, VIRTUAL_WIDTH , "center")
-		love.graphics.printf("Exit",  0,   360, VIRTUAL_WIDTH , "center")
-
-
+		love.graphics.printf("Start", 0, 200, VIRTUAL_WIDTH, "center")
+		love.graphics.printf("Credits", 0, 280, VIRTUAL_WIDTH, "center")
+		love.graphics.printf("Exit", 0, 360, VIRTUAL_WIDTH, "center")
 	elseif state == "select_game" then
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.setFont(fonts["selectionItem"])
 		love.graphics.printf("Select a Minigame", 0, 40, love.graphics.getWidth(), "center")
 		for i, game in ipairs(games) do
-			local y = 100 + (i-1)*150
+			local y = 100 + (i - 1) * 150
 			love.graphics.rectangle("line", 100, y, 400, 120)
 			if game.image then
-				love.graphics.draw(game.image, 110, y+10, 0, 0.2, 0.2)
+				love.graphics.draw(game.image, 110, y + 10, 0, 0.2, 0.2)
 			else
-				love.graphics.printf(game.name, 120, y+10, 380, "left")
+				love.graphics.printf(game.name, 120, y + 10, 380, "left")
 			end
-			love.graphics.printf("Start", 350, y+80, 60, "center")
-			love.graphics.printf("Info", 420, y+80, 60, "center")
+			love.graphics.printf("Start", 350, y + 80, 60, "center")
+			love.graphics.printf("Info", 420, y + 80, 60, "center")
 			if i == selected then
-				love.graphics.rectangle("line", 95, y-5, 410, 130)
+				love.graphics.rectangle("line", 95, y - 5, 410, 130)
 			end
 		end
 		if infoPopup then
 			local game = games[selected]
-			love.graphics.setColor(0,0,0,0.8)
+			love.graphics.setColor(0, 0, 0, 0.8)
 			love.graphics.rectangle("fill", 150, 200, 340, 180)
-			love.graphics.setColor(1,1,1,1)
+			love.graphics.setColor(1, 1, 1, 1)
 			love.graphics.printf(game.info, 160, 210, 320, "left")
 			love.graphics.printf("Press any key to close", 160, 350, 320, "center")
 		end
-
 	elseif state == "credits" then
 		drawCredits()
-
 	elseif state == "playing" then
 		if minigameModule and minigameModule.draw then
 			minigameModule.draw()
 		else
-			love.graphics.setColor(1,0.2,0.2,1)
-			love.graphics.printf("Error: Could not load minigame!\nPress ESC to return to menu.", 0, love.graphics.getHeight()/2-40, love.graphics.getWidth(), "center")
-			love.graphics.setColor(1,1,1,1)
+			love.graphics.setColor(1, 0.2, 0.2, 1)
+			love.graphics.printf(
+				"Error: Could not load minigame!\nPress ESC to return to menu.",
+				0,
+				love.graphics.getHeight() / 2 - 40,
+				love.graphics.getWidth(),
+				"center"
+			)
+			love.graphics.setColor(1, 1, 1, 1)
 		end
 	end
 
 	push:finish()
 end
 
-function drawCredits()
-	love.graphics.setColor(1, 1, 0, 1)
-	love.graphics.rectangle("fill", VIRTUAL_WIDTH/2, 0, VIRTUAL_WIDTH/4, VIRTUAL_HEIGHT/2)
-	love.graphics.setColor(1, 0, 1, 1)
-	love.graphics.rectangle("fill", VIRTUAL_WIDTH* 3/4, 0, VIRTUAL_WIDTH/4, VIRTUAL_HEIGHT/2)
-	love.graphics.setColor(1, 0, 0, 1)
-	love.graphics.rectangle("fill", VIRTUAL_WIDTH/2, VIRTUAL_HEIGHT/2, VIRTUAL_WIDTH/4, VIRTUAL_HEIGHT/2)
+local function drawFit(drawable, x, y, maxW, maxH)
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.rectangle("fill", VIRTUAL_WIDTH* 3/4, VIRTUAL_HEIGHT/2, VIRTUAL_WIDTH/4, VIRTUAL_HEIGHT/2)
+	local w, h = drawable:getWidth(), drawable:getHeight()
+
+	local scale = math.min(maxW / w, maxH / h)
+
+	love.graphics.draw(drawable, x, y, 0, scale, scale)
+end
+
+function drawCredits()
+	local t = menuAnim.t or 0
+	local r = 0.5 + 0.5 * math.sin(t)
+	local g = 0.5 + 0.5 * math.sin(t + 2)
+	local b = 0.5 + 0.5 * math.sin(t + 4)
+	love.graphics.clear(r, g, b, 1)
+	drawFit(logos["tn"], 20, 8, 110, 110)
+	drawFit(logos["politiche"], 160, 9, 80, 80)
+	drawFit(logos["piano"], 250, 8, 105, 105)
+	drawFit(logos["appm"], 380, 30, 130, 130)
+
 	love.graphics.setFont(fonts["menuItem"])
-	love.graphics.printf("Credits", 0, 0, VIRTUAL_WIDTH/2, "center")
+	love.graphics.printf("Credits", 150, 100, VIRTUAL_WIDTH - 300, "center")
 	love.graphics.setFont(fonts["creditsFont"])
-	love.graphics.printf("Out of the Game Team: \nEnea, Thomas, Virginia, Raymi, Lorenzo, Gabriele, Simone A, Tommaso, Simone F, Fabio, Alan, Leonardo, Francesco", 0, 48, VIRTUAL_WIDTH/2, "center")
-	love.graphics.printf("Press any key to return", 0, VIRTUAL_HEIGHT-32, VIRTUAL_WIDTH/2, "center")
+	love.graphics.printf(
+		"Out of the Game Team: \nEnea, Thomas, Virginia, Raymi, Lorenzo, Gabriele, Simone A, Tommaso, Simone F, Fabio, Alan, Leonardo, Francesco",
+		150,
+		148,
+		VIRTUAL_WIDTH - 300,
+		"center"
+	)
+	love.graphics.printf("Press any key to return", 100, VIRTUAL_HEIGHT - 32, VIRTUAL_WIDTH - 200, "center")
 end
 
 -- Handle keypresses globally
@@ -197,17 +222,21 @@ end
 
 function mainMenuKeypressed(key)
 	if key == "down" then
-		selected= math.min(selected+ 1, 3) 
-		if sounds["up"] then sounds["up"]:play() end
+		selected = math.min(selected + 1, 3)
+		if sounds["up"] then
+			sounds["up"]:play()
+		end
 	elseif key == "up" then
-		selected= math.max(selected- 1, 1)
-		if sounds["down"] then sounds["down"]:play() end
+		selected = math.max(selected - 1, 1)
+		if sounds["down"] then
+			sounds["down"]:play()
+		end
 	elseif key == "return" then
-		if selected== 1 then
+		if selected == 1 then
 			state = "select_game"
-		elseif selected== 2 then
+		elseif selected == 2 then
 			state = "credits"
-		elseif selected== 3 then
+		elseif selected == 3 then
 			love.event.quit()
 		end
 	elseif key == "escape" then
@@ -222,9 +251,9 @@ function selectMenuKeypressed(key)
 	end
 
 	if key == "down" then
-		selected= math.min(selected+ 1, #games)
+		selected = math.min(selected + 1, #games)
 	elseif key == "up" then
-		selected= math.max(selected- 1, 1)
+		selected = math.max(selected - 1, 1)
 	elseif key == "return" then
 		-- Start minigame
 		local game = games[selected]
