@@ -19,16 +19,18 @@ minigameModule = nil
 
 function loadFonts()
 	fonts["smallFont"] = love.graphics.newFont("assets/retro.ttf", 8)
-	fonts["creditsFont"] = love.graphics.newFont("assets/retro.ttf", 16)
+	fonts["creditsFont"] = love.graphics.newFont("assets/retro.ttf", 24)
 	fonts["bigFont"] = love.graphics.newFont("assets/Howdy Koala.ttf", 16)
-	fonts["menuItem"] = love.graphics.newFont("assets/retro.ttf", 32)
+	fonts["menuItem"] = love.graphics.newFont("assets/retro.ttf", 48)
 	fonts["selectionItem"] = love.graphics.newFont("assets/retro.ttf", 16)
 	fonts["menuTitle"] = love.graphics.newFont("assets/retro.ttf", 64)
 end
 
 function loadSounds()
 	sounds["up"] = love.audio.newSource("assets/Blip1.wav", "static")
-	sounds["down"] = love.audio.newSource("assets/Blip.wav", "static")
+	sounds["down"] = love.audio.newSource("assets/Blip1.wav", "static")
+	sounds["enter"] = love.audio.newSource("assets/Blip.wav", "static")
+	sounds["escape"] = love.audio.newSource("assets/Blip.wav", "static")
 end
 
 -- Helper: Scan games directory for minigames
@@ -223,19 +225,19 @@ function drawCredits()
 	local g = 0.7 + 0.3 * math.sin(t + 2)
 	local b = 0.7 + 0.3 * math.sin(t + 4)
 	love.graphics.clear(r, g, b, 1)
-	drawFit(logos["tn"], 20, 8, 110, 110)
-	drawFit(logos["politiche"], 160, 9, 80, 80)
-	drawFit(logos["piano"], 250, 8, 105, 105)
-	drawFit(logos["appm"], 380, 30, 130, 130)
+	drawFit(logos["tn"], 20, 8, 120, 120)
+	drawFit(logos["politiche"], 200, 9, 84, 84)
+	drawFit(logos["piano"], 320, 8, 110, 110)
+	drawFit(logos["appm"], 460, 30, 155, 155)
 
 	love.graphics.setColor(0, 0, 0)
 	love.graphics.setFont(fonts["menuItem"])
-	love.graphics.printf("Credits", 150, 100, VIRTUAL_WIDTH - 300, "center")
+	love.graphics.printf("Credits", 150, 120, VIRTUAL_WIDTH - 300, "center")
 	love.graphics.setFont(fonts["creditsFont"])
 	love.graphics.printf(
 		"Out of the Game Team: \nEnea, Thomas, Virginia, Raymi, Lorenzo, Gabriele, Simone A, Tommaso, Simone F, Fabio, Alan, Leonardo, Francesco",
 		150,
-		148,
+		200,
 		VIRTUAL_WIDTH - 300,
 		"center"
 	)
@@ -257,6 +259,9 @@ function love.keypressed(key)
 	elseif state == "select_game" then
 		selectMenuKeypressed(key)
 	elseif state == "credits" then
+		if sounds["escape"] then
+			sounds["escape"]:play()
+		end
 		state = "main_menu"
 	elseif state == "playing" then
 		playingKeypressed(key)
@@ -266,15 +271,18 @@ end
 function mainMenuKeypressed(key)
 	if key == "down" then
 		selected = math.min(selected + 1, 3)
-		if sounds["up"] then
-			sounds["up"]:play()
-		end
-	elseif key == "up" then
-		selected = math.max(selected - 1, 1)
 		if sounds["down"] then
 			sounds["down"]:play()
 		end
+	elseif key == "up" then
+		selected = math.max(selected - 1, 1)
+		if sounds["up"] then
+			sounds["up"]:play()
+		end
 	elseif key == "return" then
+		if sounds["enter"] then
+			sounds["enter"]:play()
+		end
 		if selected == 1 then
 			state = "select_game"
 		elseif selected == 2 then
@@ -295,10 +303,19 @@ function selectMenuKeypressed(key)
 
 	if key == "down" then
 		selected = math.min(selected + 1, #games)
+		if sounds["down"] then
+			sounds["down"]:play()
+		end
 	elseif key == "up" then
 		selected = math.max(selected - 1, 1)
+		if sounds["up"] then
+			sounds["up"]:play()
+		end
 	elseif key == "return" then
 		-- Start minigame
+		if sounds["enter"] then
+			sounds["enter"]:play()
+		end
 		local game = games[selected]
 		local loaded = love.filesystem.load(game.main)
 		minigameModule = loaded and loaded() or nil
@@ -309,6 +326,9 @@ function selectMenuKeypressed(key)
 	elseif key == "i" then
 		infoPopup = true
 	elseif key == "escape" then
+		if sounds["escape"] then
+			sounds["escape"]:play()
+		end
 		state = "main_menu"
 	end
 end
