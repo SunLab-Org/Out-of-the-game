@@ -89,8 +89,6 @@ function module.update(dt)
 end
 
 function module.draw()
-	push:apply("start")
-
 	-- render background
 	love.graphics.clear(0.1, 0.1, 0.1, 1) -- Clear the screen with dark grey color
 	displayFPS()
@@ -99,8 +97,6 @@ function module.draw()
 	-- Render game objects
 	food:render() -- Call the render function of the food object
 	snake:render() -- Call the render function of the snake object
-
-	push:apply("end") 
 end
 
 function module.keypressed(key)

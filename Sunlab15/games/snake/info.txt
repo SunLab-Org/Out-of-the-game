@@ -1,0 +1,3 @@
+arrows to move 
+r to reset game 
+esc to come back here
