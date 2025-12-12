@@ -1,32 +1,33 @@
-local love = require "love"
-require "gameover"
+require "games/MathiasB/gameover"
+local module = {}
+local basePath = "games/MathiasB/"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 
 local smallFont = love.graphics.newFont(28)
 
 local buca = {
-  x = 1500,
-  y = 750,
+  x = 320,
+  y = 240,
   w = 40, 
   h = 40,
   buche = 0,
-  sprite = love.graphics.newImage("Buca.png")
+  sprite = love.graphics.newImage(basePath.."Buca.png")
 }
 
 --local record = buca.buche
-local dimx = love.graphics.getWidth()
-local dimy = love.graphics.getHeight()
+local dimx = VIRTUAL_WIDTH
+local dimy = VIRTUAL_HEIGHT
 
 local suoni = {
-  suono1 = love.audio.newSource("Roccia.wav", "static"),
-  suono2 = love.audio.newSource("Mazza.wav", "static"),
-  suono3 = love.audio.newSource("Buca.wav", "static"),
-  suono4 = love.audio.newSource("Talpa.wav", "static")
+  suono1 = love.audio.newSource(basePath.."Roccia.wav", "static"),
+  suono2 = love.audio.newSource(basePath.."Mazza.wav", "static"),
+  suono3 = love.audio.newSource(basePath.."Buca.wav", "static"),
+  suono4 = love.audio.newSource(basePath.."Talpa.wav", "static")
 }
 
 local sfondo = {
-  prato = love.graphics.newImage("Prato.png")
+  prato = love.graphics.newImage(basePath.."Prato.png")
 }
 
 local ostacoli = {}
@@ -34,7 +35,7 @@ local ostacoli = {}
 local mazza = {
  x = 100, 
  y = 100,
- sprite = love.graphics.newImage("Mazza.png")
+ sprite = love.graphics.newImage(basePath.."Mazza.png")
 }
 
 local pallina = {}
@@ -42,15 +43,17 @@ local pallina = {}
 local carica = 0
 local r = 1
 
-function love.load()
-  love.window.resizable = true
+function module.load()
+  -- VIRTUAL_HEIGHT =1080
+  -- VIRTUAL_WIDTH = 1920
+  -- love.window.resizable = true
   love.graphics.setFont(smallFont)
   restartGame()
 end
 
-function love.update(dt)
-   dimx = love.graphics.getWidth()
-   dimy = love.graphics.getHeight()
+function module.update(dt)
+   dimx = VIRTUAL_WIDTH
+   dimy = VIRTUAL_HEIGHT
 
     if GameOver then
       return
@@ -58,8 +61,8 @@ function love.update(dt)
 
    
     if AABB(buca, pallina) then
-        buca.x = math.random(love.graphics.getWidth())
-        buca.y = math.random(love.graphics.getHeight())
+        buca.x = math.random(VIRTUAL_WIDTH)
+        buca.y = math.random(VIRTUAL_HEIGHT)
         buca.buche = buca.buche + 1
         carica = 0
         pallina.tiri = 0
@@ -72,26 +75,24 @@ function love.update(dt)
     
         if (#ostacoli < 19) then 
         table.insert(ostacoli, {
-            x = math.random(love.graphics.getWidth()),
-            y = math.random(love.graphics.getHeight()),
+            x = math.random(VIRTUAL_WIDTH),
+            y = math.random(VIRTUAL_HEIGHT),
             w = 30,
             h = 30,
             tipo = "talpa",
-            sprite = love.graphics.newImage("Talpa.png")
+            sprite = love.graphics.newImage(basePath.."Talpa.png")
         })
 
         table.insert(ostacoli, {
-            x = math.random(love.graphics.getWidth()),
-            y = math.random(love.graphics.getHeight()),
+            x = math.random(VIRTUAL_WIDTH),
+            y = math.random(VIRTUAL_HEIGHT),
             w = 30,
             h = 30,
             tipo = "roccia",
-            sprite = love.graphics.newImage("Sasso.png")
+            sprite = love.graphics.newImage(basePath.."Sasso.png")
         })
 
       end
-
-      
     end
 
 
@@ -120,14 +121,14 @@ function love.update(dt)
     for i in pairs(ostacoli) do
       for j in pairs(ostacoli) do
         if (not i==j) and AABB(ostacoli[j], ostacoli[i]) then
-          ostacoli[i].x = math.random(love.graphics.getWidth())
-          ostacoli[i].y = math.random(love.graphics.getHeight())
+          ostacoli[i].x = math.random(VIRTUAL_WIDTH)
+          ostacoli[i].y = math.random(VIRTUAL_HEIGHT)
         end   
       end
 
       if AABB(buca, ostacoli[i]) then
-        buca.x = math.random(love.graphics.getWidth())
-        buca.y = math.random(love.graphics.getHeight())
+        buca.x = math.random(VIRTUAL_WIDTH)
+        buca.y = math.random(VIRTUAL_HEIGHT)
       end   
     end 
 
@@ -137,7 +138,6 @@ function love.update(dt)
 
     if love.mouse.isDown("1") then
       if r < 100 then r = r + 30 else r = 100 end
-    
     end
 
 
@@ -200,7 +200,7 @@ function love.update(dt)
     end
 
 
-function love.draw()
+function module.draw()
 
   GameOverDraw(buca.buche)
   if GameOver then return end
@@ -238,18 +238,18 @@ function love.draw()
       
 end
 
-function love.keypressed(key)
+function module.keypressed(key)
   if key == "escape" then
-    love.event.quit()
+    returnToSelection()
   end
   
 end
 
-function love.mousepressed(x, y, key)
+function module.mousepressed(x, y, key)
   GameOver_mousepressed(x, y, key, restartGame)
 end
 
-function love.mousereleased(mx, my, key)
+function module.mousereleased(mx, my, key)
   if key == 1 then 
     local dx = pallina.x - mx
     local dy = pallina.y - my
@@ -287,27 +287,27 @@ function restartGame()
   ostacoli = {}
 
   table.insert(ostacoli, {
-    x = 500,
-    y = 500,
+    x = 200,
+    y = 200,
     w = 30,
     h = 30,
     tipo = "roccia",
-    sprite = love.graphics.newImage("Sasso.png")
+    sprite = love.graphics.newImage(basePath.."Sasso.png")
   })
 
   table.insert(ostacoli, {
-      x = 800,
-      y = 800,
+      x = 450,
+      y = 350,
       w = 30,
       h = 30,
       tipo = "talpa",
-      sprite = love.graphics.newImage("Talpa.png")
+      sprite = love.graphics.newImage(basePath.."Talpa.png")
   })
 
   pallina = {
     x = 100,
     y = 100,
-    x2 = 440,
+    x2 = 250,
     y2 = 0,
     w = 15,
     h = 15,
@@ -316,9 +316,11 @@ function restartGame()
     tiri = 0,
     hitrad = 50,
     palline = 3,
-    sprite = love.graphics.newImage("Pallina.png")
+    sprite = love.graphics.newImage(basePath.."Pallina.png")
   }
 
 end
 
 
+
+return module

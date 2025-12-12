@@ -366,3 +366,19 @@ function playingKeypressed(key)
 		minigameModule.keypressed(key)
 	end
 end
+
+function love.mousepressed(x, y, button)
+	if state == "playing" then
+		if minigameModule and minigameModule.mousepressed then
+			minigameModule.mousepressed(x, y, button)
+		end
+	end
+end
+
+function love.mousereleased(x, y, button)
+	if state == "playing" then
+		if minigameModule and minigameModule.mousereleased then
+			minigameModule.mousereleased(x, y, button)
+		end
+	end
+end
