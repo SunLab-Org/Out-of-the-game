@@ -34,7 +34,12 @@ function loadSounds()
 
 	sounds["explosion"] = love.audio.newSource("assets/Boom1.wav", "static")
 	sounds["hit"] = love.audio.newSource("assets/Hit3.wav", "static")
+	sounds["jump"] = love.audio.newSource("assets/Jump11.wav", "static")
 	sounds["shoot"] = love.audio.newSource("assets/Shoot6.wav", "static")
+
+	sounds['paddle_hit'] = love.audio.newSource('assets/paddle_hit.wav', 'static')
+	sounds['score'] = love.audio.newSource('assets/score.wav', 'static')
+	sounds['wall_hit'] = love.audio.newSource('assets/wall_hit.wav', 'static')
 end
 
 -- Helper: Scan games directory for minigames
