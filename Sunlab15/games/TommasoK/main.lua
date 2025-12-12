@@ -14,8 +14,6 @@ local smallFont = love.graphics.newFont(28)
 love.graphics.setFont(smallFont)
 
 function module.load()
-
-    love.graphics.setBackgroundColor(0, 0, 0)
     src1 = love.audio.newSource(path .. "Random4.wav", "static")
     ciao = love.audio.newSource(path .. "vict.mp3", "static")
 
@@ -75,7 +73,7 @@ function module.update(dt)
     for _, n in ipairs(nemici) do
         if n.vivo then
             n.x = n.x + velocitaNemici * direzioneNemici * dt
-            if n.x < 0 or n.x + n.larghezza > 800 then
+            if n.x < 0 or n.x + n.larghezza > VIRTUAL_WIDTH then
                 scendi = true
             end
         end
@@ -169,8 +167,8 @@ function restart()
     someonealive = false
        -- Giocatore
     giocatore = {
-        x = 400,
-        y = 550,
+        x = VIRTUAL_WIDTH/2 - 25,
+        y = VIRTUAL_HEIGHT - 30,
         larghezza = 50,
         altezza = 10,
         velocita = 300
@@ -181,7 +179,7 @@ function restart()
 
     -- Nemici
     nemici = {}
-    local righe, colonne = 4, 8
+    local righe, colonne = 5, 6
     for i = 1, righe do
         for j = 1, colonne do
             local nemico = {
