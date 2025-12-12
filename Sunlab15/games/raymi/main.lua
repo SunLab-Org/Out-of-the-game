@@ -4,11 +4,13 @@ SPAWN_INTERVAL = 1
 
 is_game_over = false
 highscore = 0
+points = 0
 
 sprites = {}
 
 player = {}
 enemies = {}
+projectiles = {}
 
 
 function loadSprites()
@@ -17,9 +19,6 @@ function loadSprites()
 	sprites["bullet"] = love.graphics.newImage("games/raymi/assets/bullet.png")
 	sprites["background"] = love.graphics.newImage("games/raymi/assets/background.jpg")
 end
-
-
-
 
 function spawnEnemy()
 	local height = 16
@@ -70,7 +69,17 @@ end
 
 function displayPoints()
 	love.graphics.setFont(fonts["smallFont"])
-	love.graphics.print("test", VIRTUAL_WIDTH - 80, 20)
+	love.graphics.print("Points: " .. points, VIRTUAL_WIDTH - 80, 20)
+end
+
+function displayGameOver()
+	love.graphics.setFont(fonts["bigFont"])
+	love.graphics.setColor(1, 0, 0)
+	love.graphics.print("GAME OVER", VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 20)
+	love.graphics.setFont(fonts["smallFont"])
+	love.graphics.setColor(1, 1, 1)
+	love.graphics.print("Final Score: " .. points, VIRTUAL_WIDTH / 2 - 40, VIRTUAL_HEIGHT / 2 + 10)
+	love.graphics.print("Press R to restart", VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 + 30)
 end
 
 function displayFPS()
@@ -93,6 +102,81 @@ function resetPlayer()
 	}
 end
 
+function shoot()
+	local projectile = {
+		x = player.x + player.w,
+		y = player.y + player.h / 2 + 10,
+		vx = 300,
+		vy = 0,
+		w = 4,
+		h = 4,
+	}
+	table.insert(projectiles, projectile)
+end
+
+function projectileMovements(dt)
+	for i, projectile in ipairs(projectiles) do
+		projectile.x = projectile.x + projectile.vx * dt
+		projectile.y = projectile.y + projectile.vy * dt
+	end
+	
+	-- Remove projectiles that are off-screen
+	for i = #projectiles, 1, -1 do
+		if projectiles[i].x > VIRTUAL_WIDTH then
+			table.remove(projectiles, i)
+		end
+	end
+end
+
+function checkCollisions()
+	-- Check projectile-enemy collisions
+	for pi = #projectiles, 1, -1 do
+		local projectile = projectiles[pi]
+		for ei = #enemies, 1, -1 do
+			local enemy = enemies[ei]
+			if projectile.x < enemy.x + 16 and
+			   projectile.x + projectile.w > enemy.x and
+			   projectile.y < enemy.y + 16 and
+			   projectile.y + projectile.h > enemy.y then
+				-- Collision detected
+				table.remove(projectiles, pi)
+				table.remove(enemies, ei)
+				points = points + 10
+				if sounds["hit"] then
+					sounds["hit"]:play()
+				end
+				break
+			end
+		end
+	end
+	
+	-- Check player-enemy collisions
+	if not is_game_over then
+		for i, enemy in ipairs(enemies) do
+			if player.x < enemy.x + 16 and
+			   player.x + player.w > enemy.x and
+			   player.y + (player.h / 2) < enemy.y + 16 and
+			   player.y + (player.h / 2) + player.h > enemy.y then
+				-- Player hit by enemy
+				is_game_over = true
+				if sounds["explosion"] then
+					sounds["explosion"]:play()
+				end
+			end
+		end
+	end
+end
+
+function resetGame()
+	is_game_over = false
+	points = 0
+	projectiles = {}
+	enemies = {}
+	player = resetPlayer()
+	TIMER = 0
+	SPAWN_TIMER = 0
+end
+
 -- Export the module
 local module = {}
 
@@ -112,6 +196,10 @@ function module.load()
 end
 
 function module.update(dt)
+	if is_game_over then
+		return
+	end
+	
 	TIMER = TIMER + dt
 	SPAWN_TIMER = SPAWN_TIMER + dt
 
@@ -128,6 +216,14 @@ function module.update(dt)
 		enemyMovements(dt)
 	end
 
+	-- projectile movements
+	if #projectiles > 0 then
+		projectileMovements(dt)
+	end
+
+	-- collision checks
+	checkCollisions()
+
 	if #enemies > 0 and enemies[1].x < -8 then
 		table.remove(enemies, 1)
 		print("despawned")
@@ -138,12 +234,11 @@ function module.update(dt)
 end
 
 function module.draw()
-	push:apply("start") -- Start the push library
-
 	-- render background
 	love.graphics.clear(0.1, 0.1, 0.1, 1) -- Clear the screen with dark grey color
 	love.graphics.push()
-	love.graphics.scale(0.15, 0.15) -- reduce everything by 50% in both X and Y coordinates
+	love.graphics.scale(0.25, 0.25) -- reduce everything by 50% in both X and Y coordinates
+	love.graphics.setColor(1, 1, 1)
 	love.graphics.draw(sprites["background"], 0, 0)
 	love.graphics.pop()
 	displayFPS()
@@ -153,29 +248,54 @@ function module.draw()
 	-- Render game objects
 	love.graphics.setColor(1, 1, 1)
 	love.graphics.draw(sprites["player"], player.x, player.y)
-	love.graphics.setColor(0, 1, 0)
-	love.graphics.rectangle(
-		"line",
-		player.x,
-		player.y + (sprites["player"]:getHeight() / 3),
-		sprites["player"]:getWidth(),
-		sprites["player"]:getHeight() / 2
-	)
+	-- love.graphics.setColor(0, 1, 0)
+	-- love.graphics.rectangle(
+	-- 	"line",
+	-- 	player.x,
+	-- 	player.y + (sprites["player"]:getHeight() / 3),
+	-- 	sprites["player"]:getWidth(),
+	-- 	sprites["player"]:getHeight() / 2
+	-- )
 
 	for i, enemy in ipairs(enemies) do
 		love.graphics.setColor(1, 1, 1)
 
 		love.graphics.setColor(1, 0, 0)
 		love.graphics.rectangle("fill", enemy.x, enemy.y, 16, 16)
+		-- disegna enemy di grandezza 16 x 16
+	end
+
+	-- Draw projectiles
+	love.graphics.setColor(1, 1, 0)
+	for i, projectile in ipairs(projectiles) do
+		love.graphics.rectangle("fill", projectile.x, projectile.y, projectile.w, projectile.h)
+	end
+
+	-- Display game over screen if needed
+	if is_game_over then
+		love.graphics.setColor(0, 0, 0, 0.7)
+		love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+		love.graphics.setColor(1, 1, 1)
+		displayGameOver()
 	end
 
 	-- displayTitle()
-	push:apply("end") -- End the push library
 end
 
 function module.keypressed(key)
 	-- add to our table of keys pressed this frame
 	love.keyboard.keysPressed[key] = true
+	
+	if key == "space" and not is_game_over then
+		if sounds["shoot"] then
+			sounds["shoot"]:play()
+		end
+		shoot()
+	end
+	
+	if key == "r" and is_game_over then
+		resetGame()
+	end
 end
 
 return module

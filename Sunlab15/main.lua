@@ -31,6 +31,10 @@ function loadSounds()
 	sounds["down"] = love.audio.newSource("assets/Blip1.wav", "static")
 	sounds["enter"] = love.audio.newSource("assets/Blip.wav", "static")
 	sounds["escape"] = love.audio.newSource("assets/Blip.wav", "static")
+
+	sounds["explosion"] = love.audio.newSource("assets/Boom1.wav", "static")
+	sounds["hit"] = love.audio.newSource("assets/Hit3.wav", "static")
+	sounds["shoot"] = love.audio.newSource("assets/Shoot6.wav", "static")
 end
 
 -- Helper: Scan games directory for minigames
@@ -81,7 +85,7 @@ function love.load()
 end
 
 function love.update(dt)
-	if state == "main_menu" or state == "credits" then
+	if state == "main_menu" or state == "credits" or state == "select_game" then
 		menuAnim.t = menuAnim.t + dt
 	end
 
@@ -99,6 +103,10 @@ end
 
 local function drawSelectionMenu()
 	local rowSize = 5
+	local t = menuAnim.t or 0
+	local r = 0.7 + 0.3 * math.sin(t)
+	local g = 0.7 + 0.3 * math.sin(t + 2)
+	local b = 0.7 + 0.3 * math.sin(t + 4)
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.setFont(fonts["selectionItem"])
 	love.graphics.printf("Select a Minigame", 0, 40, love.graphics.getWidth(), "center")
@@ -107,7 +115,7 @@ local function drawSelectionMenu()
 		local y = (math.floor((i - 1) / rowSize)) * (VIRTUAL_HEIGHT / 3 ) + 10
 
 		if i == selected then
-			love.graphics.setColor(1, 1, 0, 1)
+			love.graphics.setColor(r, g, b, 1)
 			love.graphics.rectangle("line", x, y, 80, 100)
 		else 
 			love.graphics.setColor(1, 1, 1, 1)
