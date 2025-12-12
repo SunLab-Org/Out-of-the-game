@@ -96,6 +96,45 @@ function love.resize(w, h)
 	push:resize(w, h)
 end
 
+
+local function drawSelectionMenu()
+	local rowSize = 5
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.setFont(fonts["selectionItem"])
+	love.graphics.printf("Select a Minigame", 0, 40, love.graphics.getWidth(), "center")
+	for i, game in ipairs(games) do
+		local x = ((i-1) % rowSize) * (VIRTUAL_WIDTH / 5) + 25 
+		local y = (math.floor((i - 1) / rowSize)) * (VIRTUAL_HEIGHT / 3 ) + 10
+
+		if i == selected then
+			love.graphics.setColor(1, 1, 0, 1)
+			love.graphics.rectangle("line", x, y, 80, 100)
+		else 
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.rectangle("line", x, y, 80, 100)
+		end
+
+		love.graphics.setColor(1, 1, 1, 1)
+		-- 80 x  100 y dimension copertina
+		if game.image then
+			love.graphics.draw(game.image, x, y)
+		else
+			love.graphics.printf(game.name, x, y, 80, "center")
+		end
+
+		love.graphics.printf("Start [ENTER]", 420, VIRTUAL_HEIGHT-20, 120, "center")
+		love.graphics.printf("Info [i]", 500, VIRTUAL_HEIGHT-20, 120, "right")
+	end
+	if infoPopup then
+		local game = games[selected]
+		love.graphics.setColor(0, 0, 0, 0.8)
+		love.graphics.rectangle("fill", 150, 200, 340, 180)
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.printf(game.info, 160, 210, 320, "left")
+		love.graphics.printf("Press any key to close", 160, 350, 320, "center")
+	end
+end
+
 function love.draw()
 	push:start()
 	love.graphics.clear(0.1, 0.1, 0.1, 1)
@@ -164,31 +203,7 @@ function love.draw()
 		love.graphics.printf("Credits", 0, 280, VIRTUAL_WIDTH, "center")
 		love.graphics.printf("Exit", 0, 360, VIRTUAL_WIDTH, "center")
 	elseif state == "select_game" then
-		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.setFont(fonts["selectionItem"])
-		love.graphics.printf("Select a Minigame", 0, 40, love.graphics.getWidth(), "center")
-		for i, game in ipairs(games) do
-			local y = 100 + (i - 1) * 150
-			love.graphics.rectangle("line", 100, y, 400, 120)
-			if game.image then
-				love.graphics.draw(game.image, 110, y + 10, 0, 0.2, 0.2)
-			else
-				love.graphics.printf(game.name, 120, y + 10, 380, "left")
-			end
-			love.graphics.printf("Start", 350, y + 80, 60, "center")
-			love.graphics.printf("Info", 420, y + 80, 60, "center")
-			if i == selected then
-				love.graphics.rectangle("line", 95, y - 5, 410, 130)
-			end
-		end
-		if infoPopup then
-			local game = games[selected]
-			love.graphics.setColor(0, 0, 0, 0.8)
-			love.graphics.rectangle("fill", 150, 200, 340, 180)
-			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.printf(game.info, 160, 210, 320, "left")
-			love.graphics.printf("Press any key to close", 160, 350, 320, "center")
-		end
+		drawSelectionMenu()
 	elseif state == "credits" then
 		drawCredits()
 	elseif state == "playing" then
@@ -209,6 +224,7 @@ function love.draw()
 
 	push:finish()
 end
+
 
 local function drawFit(drawable, x, y, maxW, maxH)
 	love.graphics.setColor(1, 1, 1, 1)
@@ -301,13 +317,23 @@ function selectMenuKeypressed(key)
 		return
 	end
 
-	if key == "down" then
+	if key == "right" then
 		selected = math.min(selected + 1, #games)
 		if sounds["down"] then
 			sounds["down"]:play()
 		end
-	elseif key == "up" then
+	elseif key == "left" then
 		selected = math.max(selected - 1, 1)
+		if sounds["up"] then
+			sounds["up"]:play()
+		end
+	elseif key == "up" then
+		selected = math.max(selected - 5, 1)
+		if sounds["up"] then
+			sounds["up"]:play()
+		end
+	elseif key == "down" then
+		selected = math.min(selected + 5, 15)
 		if sounds["up"] then
 			sounds["up"]:play()
 		end
