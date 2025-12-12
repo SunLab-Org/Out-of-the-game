@@ -1,139 +1,125 @@
--- main.lua
--- Entry point for the Love2D game
-push = require("push") -- Import the push library
-Class = require("class") -- Import the class library
+require 'games/flappy/StateMachine'
 
-VIRTUAL_WIDTH = 320 -- Virtual width of the game window
-VIRTUAL_HEIGHT = 200 -- Virtual height of the game window
-WINDOW_WIDTH = 1280 -- Actual width of the game window
-WINDOW_HEIGHT = 720 -- Actual height of the game window
+require 'games/flappy/states/BaseState'
+require 'games/flappy/states/CountdownState'
+require 'games/flappy/states/PlayState'
+require 'games/flappy/states/ScoreState'
+require 'games/flappy/states/TitleScreenState'
 
-STARTING_POS = {
-	x = VIRTUAL_WIDTH / 2,
-	y = VIRTUAL_HEIGHT / 2,
-} -- Starting position of the snake head
+require 'games/flappy/Bird'
+require 'games/flappy/Pipe'
+require 'games/flappy/PipePair'
 
-is_game_over = false
-highscore = 0 -- Variable to track the high score
 
-require("Snake") -- Import the snake class
-require("Food") -- Import the food class
+local M = {}
 
-function love.load()
-	love.graphics.setDefaultFilter("nearest", "nearest") -- Set the default filter for graphics
-	love.window.setTitle("Snake Game") -- Set the window title
+local background
+local backgroundScroll = 0
 
-	math.randomseed(os.time()) -- Seed the random number generator
-	lastUpdate = 0 -- Variable to track the last update time
+local ground
+local groundScroll = 0
 
-	-- load fonts
-	smallFont = love.graphics.newFont("retro.ttf", 8)
-	bigFont = love.graphics.newFont("Howdy Koala.ttf", 16)
-	-- end fonts
+local BACKGROUND_SCROLL_SPEED = 30
+local GROUND_SCROLL_SPEED = 60
 
-	-- setup Snake body, snake head
-	is_game_over = false -- Flag to check if the game is over
-	snake = Snake(STARTING_POS.x, STARTING_POS.y) -- Create a new snake object
-	food = Food() -- Create a new food object
+local BACKGROUND_LOOPING_POINT = 413
 
-	push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
-		fullscreen = false,
-		resizable = true,
-		vsync = true,
-	}) -- Setup the screen using push
+-- global variable we can use to scroll the map
+local scrolling = true
 
-	love.keyboard.keysPressed = {}
-	love.mouse.mousePressed = {} -- Table to track mouse presses
+gStateMachine = StateMachine {
+        ['title'] = function() return TitleScreenState() end,
+        ['countdown'] = function() return CountdownState() end,
+        ['play'] = function() return PlayState() end,
+        ['score'] = function() return ScoreState() end
+    }
+
+function M.load()
+    -- seed the RNG
+    math.randomseed(os.time())
+
+    -- initialize our nice-looking retro text fonts
+    smallFont = love.graphics.newFont('games/flappy/font.ttf', 8)
+    mediumFont = love.graphics.newFont('games/flappy/flappy.ttf', 14)
+    flappyFont = love.graphics.newFont('games/flappy/flappy.ttf', 28)
+    hugeFont = love.graphics.newFont('games/flappy/flappy.ttf', 56)
+    love.graphics.setFont(flappyFont)
+
+    -- load images
+    background = love.graphics.newImage('games/flappy/background.png')
+    ground = love.graphics.newImage('games/flappy/ground.png')
+
+    -- initialize our table of sounds
+    sounds = {
+        ['jump'] = love.audio.newSource('games/flappy/jump.wav', 'static'),
+        ['explosion'] = love.audio.newSource('games/flappy/explosion.wav', 'static'),
+        ['hurt'] = love.audio.newSource('games/flappy/hurt.wav', 'static'),
+        ['score'] = love.audio.newSource('games/flappy/score.wav', 'static'),
+    }
+
+
+    -- initialize state machine with all state-returning functions
+    gStateMachine:change('title')
+
+    -- initialize input table
+    love.keyboard.keysPressed = {}
+
+    -- initialize mouse input table
+    love.mouse.buttonsPressed = {}
 end
 
-function love.keypressed(key)
-	-- add to our table of keys pressed this frame
-	love.keyboard.keysPressed[key] = true
 
-	if key == "escape" then
-		love.event.quit()
-	end
+function M.keypressed(key)
+    -- add to our table of keys pressed this frame
+    love.keyboard.keysPressed[key] = true
+
+    if key == 'escape' then
+        sounds['music']:stop()
+        returnToSelection()
+    end
 end
 
 --[[
     LÖVE2D callback fired each time a mouse button is pressed; gives us the
     X and Y of the mouse, as well as the button in question.
 ]]
-function love.mousepressed(x, y, button)
-	love.mouse.buttonsPressed[button] = true
+function M.mousepressed(x, y, button)
+    love.mouse.buttonsPressed[button] = true
 end
 
 function love.keyboard.wasPressed(key)
-	return love.keyboard.keysPressed[key]
+    return love.keyboard.keysPressed[key]
 end
 
 --[[
     Equivalent to our keyboard function from before, but for the mouse buttons.
 ]]
 function love.mouse.wasPressed(button)
-	return love.mouse.buttonsPressed[button]
+    return love.mouse.buttonsPressed[button]
 end
 
-function love.update(dt)
-	if love.keyboard.wasPressed("escape") then -- If the escape key is pressed
-		love.event.quit() -- Quit the game
-	end
-	if love.keyboard.wasPressed("r") then -- If the 'r' key is pressed
-		is_game_over = false -- Reset the game over flag
-	end
+function M.update(dt)
+    if scrolling then
+        backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % (BACKGROUND_LOOPING_POINT/2)
+        groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % (VIRTUAL_WIDTH/2)
+    end
 
-	highscore = math.max(highscore, (snake.length - 5) * 10) -- Update the high score based on the snake length
+    gStateMachine:update(dt)
 
-	if is_game_over then -- If the game is over
-		-- is_game_over = false -- Reset the game over flag
-		snake = Snake(STARTING_POS.x, STARTING_POS.y) -- Create a new snake object
-		return
-	end
-
-	-- limit the frame rate to 60 FPS
-	if love.timer.getTime() - lastUpdate > 1 / 10 then -- Check if the time since the last update is greater than 1/60 seconds
-		print("debugging")
-		lastUpdate = love.timer.getTime() -- Update the last update time
-		-- Update game logic
-		snake:update(dt) -- Call the update function of the snake object
-		snake:eat(food) -- Call the eat function of the snake object
-
-		love.keyboard.keysPressed = {}
-		love.mouse.buttonsPressed = {}
-	else
-		return -- If not, return to limit the frame rate
-	end
+    love.keyboard.keysPressed = {}
+    love.mouse.buttonsPressed = {}
 end
 
-function love.draw()
-	push:apply("start") -- Start the push library
-
-	-- render background
-	love.graphics.clear(0.1, 0.1, 0.1, 1) -- Clear the screen with dark grey color
-	displayFPS()
-	displayPoints()
-
-	-- Render game objects
-	food:render() -- Call the render function of the food object
-	snake:render() -- Call the render function of the snake object
-
-	-- displayTitle()
-	push:apply("end") -- End the push library
+function M.draw()
+    local bgWidth = background:getWidth()
+    local bgHeight = background:getHeight()
+    local scaleX = VIRTUAL_WIDTH / bgWidth
+    local scaleY = VIRTUAL_HEIGHT / bgHeight
+    love.graphics.draw(background, -backgroundScroll, 0, 0, scaleX*1.5, scaleY)
+    gStateMachine:render()
+    love.graphics.draw(ground, -groundScroll, VIRTUAL_HEIGHT - 16)
+    -- love.graphics.setColor(0,0,0)
+    -- love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, 16)
 end
 
-function displayPoints()
-	text = "Points: " .. (snake.length - 5) * 10 -- Create a string with the points
-	love.graphics.setFont(smallFont) -- Set the font to bigFont
-	love.graphics.print(text, VIRTUAL_WIDTH - 80, 10)
-
-	text = "Highscore: " .. highscore -- Create a string with the points
-	love.graphics.setFont(smallFont) -- Set the font to bigFont
-	love.graphics.print(text, VIRTUAL_WIDTH - 80, 20)
-end
-
-function displayFPS()
-	-- simple FPS display across all states
-	love.graphics.setFont(smallFont)
-	love.graphics.setColor(0, 255, 0, 255)
-	love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 10, 10)
-end
+return M

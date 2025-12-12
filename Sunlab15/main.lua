@@ -374,6 +374,8 @@ end
 
 function playingKeypressed(key)
 	if key == "escape" then
+		VIRTUAL_WIDTH = 640 -- Virtual width of the game window
+		VIRTUAL_HEIGHT = 480 -- Virtual height of the game window
 		returnToSelection()
 	elseif minigameModule and minigameModule.keypressed then
 		minigameModule.keypressed(key)
