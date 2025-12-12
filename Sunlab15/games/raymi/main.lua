@@ -1,26 +1,30 @@
-TIMER = 0
-SPAWN_TIMER = 0
-SPAWN_INTERVAL = 1
+-- Export the module
+local module = {}
 
-is_game_over = false
-highscore = 0
-points = 0
+-- Local game state
+local TIMER = 0
+local SPAWN_TIMER = 0
+local SPAWN_INTERVAL = 1
 
-sprites = {}
+local is_game_over = false
+local highscore = 0
+local points = 0
 
-player = {}
-enemies = {}
-projectiles = {}
+local sprites = {}
+
+local player = {}
+local enemies = {}
+local projectiles = {}
 
 
-function loadSprites()
+local function loadSprites()
 	sprites["player"] = love.graphics.newImage("games/raymi/assets/player.png")
 	-- sprites["enemy"] = love.graphics.newImage("ALC-17.PNG")
 	sprites["bullet"] = love.graphics.newImage("games/raymi/assets/bullet.png")
 	sprites["background"] = love.graphics.newImage("games/raymi/assets/background.jpg")
 end
 
-function spawnEnemy()
+local function spawnEnemy()
 	local height = 16
 	local width = 16
 
@@ -35,14 +39,14 @@ function spawnEnemy()
 	table.insert(enemies, #enemies, enemy)
 end
 
-function enemyMovements(dt)
+local function enemyMovements(dt)
 	for i, enemy in ipairs(enemies) do
 		enemy.x = enemy.x + enemy.dx * dt
 		enemy.y = enemy.y + enemy.dy * dt
 	end
 end
 
-function playerMovements(dt)
+local function playerMovements(dt)
 	if love.keyboard.isDown("w") then
 		player.y = player.y - player.dy * dt
 	end
@@ -62,17 +66,17 @@ function playerMovements(dt)
 	player.y = math.min(VIRTUAL_HEIGHT - player.h - 10, player.y)
 end
 
-function displayTutorial()
+local function displayTutorial()
 	love.graphics.setFont(fonts["smallFont"])
 	love.graphics.print("wasd to move; space to shoot", 0, VIRTUAL_HEIGHT - 10)
 end
 
-function displayPoints()
+local function displayPoints()
 	love.graphics.setFont(fonts["smallFont"])
 	love.graphics.print("Points: " .. points, VIRTUAL_WIDTH - 80, 20)
 end
 
-function displayGameOver()
+local function displayGameOver()
 	love.graphics.setFont(fonts["bigFont"])
 	love.graphics.setColor(1, 0, 0)
 	love.graphics.print("GAME OVER", VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 20)
@@ -82,14 +86,14 @@ function displayGameOver()
 	love.graphics.print("Press R to restart", VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 + 30)
 end
 
-function displayFPS()
+local function displayFPS()
 	-- simple FPS display across all states
 	love.graphics.setFont(fonts["smallFont"])
 	love.graphics.setColor(0, 255, 0, 255)
 	love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 10, 10)
 end
 
-function resetPlayer()
+local function resetPlayer()
 	return {
 		x = 20,
 		y = VIRTUAL_HEIGHT / 2,
@@ -102,7 +106,7 @@ function resetPlayer()
 	}
 end
 
-function shoot()
+local function shoot()
 	local projectile = {
 		x = player.x + player.w,
 		y = player.y + player.h / 2 + 10,
@@ -114,7 +118,7 @@ function shoot()
 	table.insert(projectiles, projectile)
 end
 
-function projectileMovements(dt)
+local function projectileMovements(dt)
 	for i, projectile in ipairs(projectiles) do
 		projectile.x = projectile.x + projectile.vx * dt
 		projectile.y = projectile.y + projectile.vy * dt
@@ -128,7 +132,7 @@ function projectileMovements(dt)
 	end
 end
 
-function checkCollisions()
+local function checkCollisions()
 	-- Check projectile-enemy collisions
 	for pi = #projectiles, 1, -1 do
 		local projectile = projectiles[pi]
@@ -167,7 +171,7 @@ function checkCollisions()
 	end
 end
 
-function resetGame()
+local function resetGame()
 	is_game_over = false
 	points = 0
 	projectiles = {}
@@ -176,9 +180,6 @@ function resetGame()
 	TIMER = 0
 	SPAWN_TIMER = 0
 end
-
--- Export the module
-local module = {}
 
 function module.load()
 	love.graphics.setDefaultFilter("nearest", "nearest") -- Set the default filter for graphics
