@@ -4,7 +4,7 @@ local basePath = "games/MathiasB/"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 
-local smallFont = love.graphics.newFont(28)
+local smallFont = love.graphics.newFont(12)
 
 local buca = {
   x = 320,
@@ -15,7 +15,6 @@ local buca = {
   sprite = love.graphics.newImage(basePath.."Buca.png")
 }
 
---local record = buca.buche
 local dimx = VIRTUAL_WIDTH
 local dimy = VIRTUAL_HEIGHT
 
@@ -35,8 +34,11 @@ local ostacoli = {}
 local mazza = {
  x = 100, 
  y = 100,
- sprite = love.graphics.newImage(basePath.."Mazza.png")
+ sprite = love.graphics.newImage(basePath.."Mazza.png"),
 }
+mazza.w = mazza.sprite:getWidth()
+mazza.h = mazza.sprite:getHeight()
+
 
 local pallina = {}
 
@@ -44,9 +46,7 @@ local carica = 0
 local r = 1
 
 function module.load()
-  -- VIRTUAL_HEIGHT =1080
-  -- VIRTUAL_WIDTH = 1920
-  -- love.window.resizable = true
+  love.mouse.setVisible(false)
   love.graphics.setFont(smallFont)
   restartGame()
 end
@@ -136,62 +136,49 @@ function module.update(dt)
     pallina.y = pallina.y + pallina.vy * dt
     pallina.x = pallina.x + pallina.vx * dt
 
-    if love.mouse.isDown("1") then
-      if r < 100 then r = r + 30 else r = 100 end
+    if love.mouse.isDown("1") and pallina.vx == 0 and pallina.vy == 0 then
+        carica = math.min(carica + (100 * dt), 100) 
+                local mx, my = love.mouse.getPosition()
+    else
+        mazza.rotation = 0
     end
+    if carica == carica + 1 then suoni.suono2:play() end
 
-
-    if love.mouse.isDown("1") then
-      carica = carica + 1
-    end
-
-    if carica >= 101 then
-      carica = 0
-
-    end
-
-    if carica == carica + 1 then
-      suoni.suono2:play()
-
-    end
 
     mazza.x, mazza.y = love.mouse.getPosition()
-    if pallina.x <= 0 then 
+    mazza.y = mazza.y + mazza.h/2
+
+    local p_h_s = pallina.h / 2
+    local p_w_s = pallina.w / 2 
+    
+    if pallina.x <= p_w_s then 
         pallina.vx = - pallina.vx
-      
+        pallina.x = p_w_s
     end
 
-    if pallina.y <= 0 then 
+    if pallina.y <= p_h_s then 
         pallina.vy = - pallina.vy 
+        pallina.y = p_h_s
     end
 
-    if pallina.x >= dimx then 
+    if pallina.x >= dimx - p_w_s then 
         pallina.vx = - pallina.vx
+        pallina.x = dimx - p_w_s 
     end
 
-    if pallina.y >= dimy then 
+    if pallina.y >= dimy - p_h_s then 
         pallina.vy = - pallina.vy
+        pallina.y = dimy - p_h_s
     end
 
-    if (pallina.vx > 0 ) then
-        pallina.vx = pallina.vx - 5
-        if pallina.vx < 0 then pallina.vx = 0 end
+    local function apply_friction(v)
+        if math.abs(v) < 5 then return 0 end 
+        v = v * 0.98
+        return v
     end
 
-    if (pallina.vy > 0 ) then
-        pallina.vy = pallina.vy - 5
-        if pallina.vy < 0 then pallina.vy = 0 end
-    end
-
-    if (pallina.vx < 0 ) then
-        pallina.vx = pallina.vx + 5
-        if pallina.vx > 0 then pallina.vx = 0 end
-    end
-
-    if (pallina.vy < 0 ) then
-        pallina.vy = pallina.vy + 5
-        if pallina.vy > 0 then pallina.vy = 0 end
-    end
+    pallina.vx = apply_friction(pallina.vx)
+    pallina.vy = apply_friction(pallina.vy)
 
     if pallina.palline <= 0 then
         GameOver = true
@@ -201,37 +188,43 @@ function module.update(dt)
 
 
 function module.draw()
+  
+  local p_sprite = pallina.sprite
+  local p_w = p_sprite:getWidth()
+  local p_h = p_sprite:getHeight()
+  
+
+  local m_sprite = mazza.sprite
+  local m_w = m_sprite:getWidth()
+  local m_h = m_sprite:getHeight()
+  
+  local b_sprite = buca.sprite
+  local b_w = b_sprite:getWidth()
+  local b_h = b_sprite:getHeight()
 
   GameOverDraw(buca.buche)
   if GameOver then return end
   
-  
-  -- sfondo
   love.graphics.draw(sfondo.prato, 0, 0, 0, 10, 10)
 
-  -- ostacoli
   for _, ostacolo in ipairs(ostacoli) do
-    love.graphics.draw(ostacolo.sprite, ostacolo.x-85, ostacolo.y-85, 0, 6, 6)
+    local o_sprite = ostacolo.sprite
+    local o_w = o_sprite:getWidth()
+    local o_h = o_sprite:getHeight()
+    love.graphics.draw(o_sprite, ostacolo.x, ostacolo.y, 0, 6, 6, o_w/2, o_h/2)
   end
 
-    
+  love.graphics.draw(p_sprite, pallina.x, pallina.y, 0, 3, 3, p_w/2, p_h/2)
 
-  --palline
-  love.graphics.draw(pallina.sprite, pallina.x-48, pallina.y-48, 0, 3, 3)
 
   for i = 1, pallina.palline do
-    love.graphics.draw(pallina.sprite, pallina.x2-(90 - i*30), pallina.y2, 0, 2, 2)
+    love.graphics.draw(p_sprite, pallina.x2-(90 - i*30), pallina.y2, 0, 2, 2, p_w/2, p_h/2)
   end
   
-
-  --buca
-    love.graphics.draw(buca.sprite, buca.x-70, buca.y-70, 0, 4, 4)
+  love.graphics.draw(b_sprite, buca.x, buca.y, 0, 4, 4, b_w/2, b_h/2)
+  love.graphics.draw(m_sprite, mazza.x, mazza.y, mazza.rotation, 3, 3, m_w/2, m_h)
     
-    --mazza
-    love.graphics.draw(mazza.sprite, mazza.x-48, mazza.y-48, 0, 3, 3)
-    
-    --testo
-      love.graphics.print("Potenza: " .. carica, 0, 0)
+      love.graphics.print("Potenza: " .. math.floor(carica), 0, 0)
       love.graphics.print("Punteggio:" .. buca.buche, 200, 0)
       love.graphics.print("Tiri: " .. pallina.tiri, 600, 0)
 
@@ -250,24 +243,26 @@ function module.mousepressed(x, y, key)
 end
 
 function module.mousereleased(mx, my, key)
-  if key == 1 then 
+  if key == 1 and pallina.vx == 0 and pallina.vy == 0 then 
     local dx = pallina.x - mx
     local dy = pallina.y - my
+    
+    local l = math.sqrt(dx ^ 2 + dy ^ 2)
+    if l > pallina.hitrad or carica < 1 then 
+      carica = 0
+      return 
+    end
+    
     suoni.suono2:play() 
     
-
-      local l = math.sqrt(dx ^ 2 + dy ^ 2)
-    
-      if l > pallina.hitrad then return end
-      
-    
-      pallina.tiri = pallina.tiri + 1
+    pallina.tiri = pallina.tiri + 1
     dx = dx / l
     dy = dy / l
   
-    pallina.vx = carica * dx * 15
-    pallina.vy = carica * dy * 15
-    carica = carica - carica
+
+    pallina.vx = carica * dx * 20
+    pallina.vy = carica * dy * 20
+    carica = 0
     
   end
 end
@@ -282,6 +277,7 @@ end
 function restartGame()
   GameOver = false
   buca.buche = 0
+  carica = 0
 
 
   ostacoli = {}
@@ -303,20 +299,22 @@ function restartGame()
       tipo = "talpa",
       sprite = love.graphics.newImage(basePath.."Talpa.png")
   })
+  
+  local p_sprite = love.graphics.newImage(basePath.."Pallina.png")
 
   pallina = {
     x = 100,
     y = 100,
-    x2 = 250,
-    y2 = 0,
-    w = 15,
-    h = 15,
+    x2 = 150,
+    y2 = 20,
+    w = p_sprite:getWidth(), -- Usa le dimensioni dello sprite non scalate
+    h = p_sprite:getHeight(), -- Usa le dimensioni dello sprite non scalate
     vx = 0,
     vy = 0,
     tiri = 0,
-    hitrad = 50,
+    hitrad = 150, -- Aumentato il raggio di tiro per dare più margine
     palline = 3,
-    sprite = love.graphics.newImage(basePath.."Pallina.png")
+    sprite = p_sprite
   }
 
 end

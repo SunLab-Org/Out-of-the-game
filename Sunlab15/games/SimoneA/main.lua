@@ -1,33 +1,27 @@
-require "setup"
+local module = {}
+local path = "games/SimoneA/"
+
+require "games/SimoneA/setup"
 local love = require "love"
-require "gameover"
+require "games/SimoneA/gameover"
 
 local punteggio = 180
 
 local power = 0
-local scale = 2
+scale = 1.5
 
 local carica = false
 
-local smallFont = love.graphics.newFont(28)
-
-
-local tavolo = {
-    x = 16,
-    y = 16,
-    w = 1058,
-    h = 424,
-    sprite = love.graphics.newImage("Tavolo_biliardo.png")
-}
+local smallFont = love.graphics.newFont(12)
 
 local pallinaBianca = {
-    x =850,
+    x =2/3 * tavolo.w,
     y = tavolo.h/2,
-    r = 15,
+    r = 7.5 * scale,
     vx = 0,
     vy = 0,
     hitrad = 50,
-    sprite = love.graphics.newImage("sprites/Pallina_bianca.png")
+    sprite = love.graphics.newImage(path .. "sprites/Pallina_bianca.png")
 }
 
 local mazza = {
@@ -37,7 +31,7 @@ local mazza = {
     offsetX = 0,
     offsetY = 0,
     r = 40,
-    sprite = love.graphics.newImage("sprites/Mazza.png")
+    sprite = love.graphics.newImage(path .. "sprites/Mazza.png")
 }
 
 
@@ -65,14 +59,14 @@ function collisione(a, b)
 end
 
 
-function love.load()
-    love.window.setMode(1090, 600)
+function module.load()
+    love.mouse.setVisible(false)
     restart()
     mazza.offsetX = mazza.sprite:getWidth()
     mazza.offsetY = mazza.sprite:getHeight()
 end
 
-function love.update(dt)
+function module.update(dt)
     if GameOver then
         return
     end
@@ -172,14 +166,16 @@ function love.update(dt)
 end
 
 
-function love.draw()
+function module.draw()
     
     GameOverDraw(punteggio)
     if GameOver then return end
 
-    love.graphics.draw(tavolo.sprite, 0, 0, 0, scale * 4, scale * 4)
+    local table_x_scale = VIRTUAL_WIDTH/tavolo.sprite:getWidth()
+
+    love.graphics.draw(tavolo.sprite, 0, 0, 0, table_x_scale , table_x_scale)
     
-    love.graphics.rectangle("line", tavolo.x, tavolo.y, tavolo.w, tavolo.h)
+    -- love.graphics.rectangle("line", tavolo.x, tavolo.y, tavolo.w, tavolo.h)
    
     love.graphics.draw(
         mazza.sprite,
@@ -194,8 +190,11 @@ function love.draw()
 
     love.graphics.setColor(1,1,1)
 
+    local sprite_w = pallinaBianca.sprite:getWidth()
+    local sprite_h = pallinaBianca.sprite:getHeight()
+
     for _, pallina in ipairs(palline) do
-        love.graphics.circle("line", pallina.x, pallina.y, pallina.r)
+        -- love.graphics.circle("line", pallina.x, pallina.y, pallina.r)
         love.graphics.draw(
             pallina.sprite,
             pallina.x,
@@ -203,12 +202,12 @@ function love.draw()
             0,
             scale,
             scale,
-            pallina.r/2,
-            pallina.r/2
+            sprite_w/2,
+            sprite_h/2
         )
     end
 
-    love.graphics.circle("line", pallinaBianca.x, pallinaBianca.y, pallinaBianca.r)
+    -- love.graphics.circle("line", pallinaBianca.x, pallinaBianca.y, pallinaBianca.r)
 
     love.graphics.draw(
         pallinaBianca.sprite,
@@ -217,27 +216,27 @@ function love.draw()
         0,
         scale,
         scale,
-        pallinaBianca.r/2,
-        pallinaBianca.r/2
+        sprite_w/2,
+        sprite_h/2
     )
 
-    love.graphics.circle("line", pallinaBianca.x, pallinaBianca.y, pallinaBianca.hitrad)
+    -- love.graphics.circle("line", pallinaBianca.x, pallinaBianca.y, pallinaBianca.hitrad)
 
     love.graphics.setFont(smallFont)
-    love.graphics.print("punteggio: "..math.floor(punteggio), 0, 500)
+    love.graphics.print("punteggio: "..math.floor(punteggio), 0, VIRTUAL_HEIGHT * 2/3)
 
 
     -- Disegno buche
-    love.graphics.setColor(0, 0, 0)   -- nero
+    love.graphics.setColor(0, 0, 0)  
     for _, h in ipairs(buche) do
         love.graphics.circle("fill", h.x, h.y, h.r)
     end
-    love.graphics.setColor(1, 1, 1)   -- reset colore
+    love.graphics.setColor(1, 1, 1)
 
     
 end
 
-function love.mousepressed(mx, my, button)
+function module.mousepressed(mx, my, button)
 
     GameOver_mousepressed(mx, my, button, restart)
 
@@ -247,7 +246,7 @@ function love.mousepressed(mx, my, button)
 
 end
 
-function love.mousereleased(mx, my, button)
+function module.mousereleased(mx, my, button)
     if button ~= 1 then return end
 
     carica = false
@@ -317,7 +316,7 @@ function bounce(a,b, coll)
     end
 end
 
-function love.keypressed(key)
+function module.keypressed(key)
     if key == "escape" then
         love.event.quit()
     end
@@ -330,8 +329,10 @@ function restart()
     GameOver = false
     GameWon = false
     punteggio = 180
-    pallinaBianca.x =850
+    pallinaBianca.x = 2/3 * tavolo.w
     pallinaBianca.y = tavolo.h/2
     pallinaBianca.vx = 0
     pallinaBianca.vy = 0
 end
+
+return module

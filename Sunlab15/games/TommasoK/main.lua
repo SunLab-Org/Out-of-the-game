@@ -1,5 +1,8 @@
 local love = require "love"
-require "gameover"
+local module = {}
+local path = "games/TommasoK/"
+
+require "games/TommasoK/gameover"
 
 local nemmicoimg
 local ioimg
@@ -10,20 +13,21 @@ local timer = 1
 local smallFont = love.graphics.newFont(28)
 love.graphics.setFont(smallFont)
 
-function love.load()
+function module.load()
+
     love.graphics.setBackgroundColor(0, 0, 0)
-    src1 = love.audio.newSource("Random4.wav", "static")
-    ciao = love.audio.newSource("vict.mp3", "static")
+    src1 = love.audio.newSource(path .. "Random4.wav", "static")
+    ciao = love.audio.newSource(path .. "vict.mp3", "static")
 
 
-    ioimg = love.graphics.newImage("png/steev.png")
-    nemmicoimg = love.graphics.newImage("png/creeper.png")
-    colpoimg = love.graphics.newImage("png/palla-di-fuoco.png")
+    ioimg = love.graphics.newImage(path .. "png/steev.png")
+    nemmicoimg = love.graphics.newImage(path .. "png/creeper.png")
+    colpoimg = love.graphics.newImage(path .. "png/palla-di-fuoco.png")
 
     restart()
 end
 
-function love.update(dt)
+function module.update(dt)
     if GameOver then return end
     timer = timer - dt
     if timer < 0 then
@@ -39,7 +43,7 @@ function love.update(dt)
     end
 
     -- Impedire di uscire dallo schermo
-    giocatore.x = math.max(0, math.min(800 - giocatore.larghezza, giocatore.x))
+    giocatore.x = math.max(0, math.min(VIRTUAL_WIDTH - giocatore.larghezza, giocatore.x))
 
     -- Sparo
     tempoSparo = tempoSparo - dt
@@ -115,7 +119,7 @@ function love.update(dt)
     end
 end
 
-function love.draw()
+function module.draw()
 
     GameOverDraw(punti)
 
@@ -150,11 +154,11 @@ function collisione(a, b)
     
 end
 
-function love.keypressed(key)
+function module.keypressed(key)
     if key == "escape" then love.event.quit() end
 end
 
-function love.mousepressed(x, y, button)
+function module.mousepressed(x, y, button)
     GameOver_mousepressed(x, y, button, restart)
 end
 
@@ -198,3 +202,4 @@ function restart()
 end
 
 
+return module

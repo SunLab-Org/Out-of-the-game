@@ -60,7 +60,7 @@ function module.update(dt)
     timer = timer - dt
     if love.keyboard.isDown("right") then
             x = x + vx * dt
-            x = math.min(x,740)
+            x = math.min(x,VIRTUAL_WIDTH)
     end
    
     if love.keyboard.isDown("left") then

@@ -12,8 +12,8 @@ local restartButton = {
 
 function GameOverDraw(punti)
     if GameOver then
-    local w = love.graphics.getWidth()
-    local h = love.graphics.getHeight()
+    local w = VIRTUAL_WIDTH
+    local h = VIRTUAL_HEIGHT
     local centerX = w / 2
     local centerY = h / 2
 

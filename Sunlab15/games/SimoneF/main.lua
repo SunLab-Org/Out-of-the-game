@@ -1,14 +1,16 @@
 local love = require "love"
-require "gameover"
 
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-VIRTUAL_WIDTH = 800
-VIRTUAL_HEIGHT = 800
+local module = {}
+local path = "games/SimoneF/"
+require "games/SimoneF/gameover"
 
-local Immagine = love.graphics.newImage("Razzo.png")
-local Image = love.graphics.newImage("Ostacolo.png")
-local Im = love.graphics.newImage("Buco.png")
+-- settato direttamente qui
+WINDOW_WIDTH = VIRTUAL_WIDTH
+WINDOW_HEIGHT = VIRTUAL_HEIGHT
+
+local Immagine = love.graphics.newImage(path .. "Razzo.png")
+local Image = love.graphics.newImage(path .. "Ostacolo.png")
+local Im = love.graphics.newImage(path .. "Buco.png")
 
 local spostamentoy = WINDOW_HEIGHT / 2
 local spostamentox = WINDOW_WIDTH / 2
@@ -33,8 +35,7 @@ function isColliding(f)
 end
 
 
-function love.load()
-    love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT)
+function module.load()
 
     love.graphics.setDefaultFilter('nearest', 'nearest')
     love.window.setTitle('Razzo nello spazio')
@@ -42,16 +43,12 @@ function love.load()
 
     restart()
 
-    music = love.audio.newSource("Suono buco.wav", "static")
-    suono = love.audio.newSource("Suono fiamma.wav", "static")
+    music = love.audio.newSource(path .. "Suono buco.wav", "static")
+    suono = love.audio.newSource(path .. "Suono fiamma.wav", "static")
 
 end
 
-function love.resize(w, h)
-    push:resize(w, h)
-end
-
-function love.update(dt)
+function module.update(dt)
     timer = timer - dt
 
     if GameOver then return end
@@ -109,17 +106,17 @@ function love.update(dt)
 
     if isColliding(Buco) then 
         music:play()
-        Buco.x = math.random(50, 1200)
-        Buco.y = math.random(50, 750)
-        spostamentoy = math.random(500, 650)
-        spostamentox = math.random(50, 1200)
+        Buco.x = math.random(50, WINDOW_WIDTH - 50)
+        Buco.y = math.random(50, WINDOW_HEIGHT - 50)
+        spostamentoy = math.random(WINDOW_HEIGHT/2, WINDOW_HEIGHT - 100)
+        spostamentox = math.random(50, WINDOW_WIDTH - 50)
         Ostacolo = {}
         punti = punti + 1
     end
 
 end
 
-function love.draw()
+function module.draw()
     GameOverDraw(punti)
 
     if GameOver then return end
@@ -136,20 +133,20 @@ function love.draw()
 
 end
 
-function love.keypressed(key)
+function module.keypressed(key)
     if key == "escape" then
         love.event.quit()
     end
 
 end
 
-function love.mousepressed(x,y, k)
+function module.mousepressed(x,y, k)
     GameOver_mousepressed(x, y, k, restart)
 
 end
 
 function restart()
-    spostamentoy = WINDOW_HEIGHT / 2
+    spostamentoy = WINDOW_HEIGHT - h
     spostamentox = WINDOW_WIDTH / 2
     tempo = 0.4
     timer = 1.5
@@ -158,8 +155,8 @@ function restart()
     h = 88
 
     Buco = {
-        x = 700,
-        y = 200,
+        x = VIRTUAL_WIDTH/2,
+        y = VIRTUAL_HEIGHT/2,
         w = 32,
         h =  32
     }
@@ -168,3 +165,5 @@ function restart()
     punti = 0
 end
 
+
+return module
