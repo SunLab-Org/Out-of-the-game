@@ -8,11 +8,6 @@ function CountdownState:init()
     self.timer = 0
 end
 
---[[
-    Keeps track of how much time has passed and decreases count if the
-    timer has exceeded our countdown time. If we have gone down to 0,
-    we should transition to our PlayState.
-]]
 function CountdownState:update(dt)
     self.timer = self.timer + dt
 

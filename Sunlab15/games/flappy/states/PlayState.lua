@@ -102,17 +102,11 @@ function PlayState:render()
     self.bird:render()
 end
 
---[[
-    Called when this state is transitioned to from another state.
-]]
 function PlayState:enter()
     -- if we're coming from death, restart scrolling
     scrolling = true
 end
 
---[[
-    Called when this state changes to another state.
-]]
 function PlayState:exit()
     -- stop scrolling for the death/score screen
     scrolling = false
