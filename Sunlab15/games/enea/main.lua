@@ -82,13 +82,8 @@ function module.load()
 end
 
 
-function love.keypressed(key)
-    -- add to our table of keys pressed this frame
-    love.keyboard.keysPressed[key] = true
+function module.keypressed(key)
 
-    if key == 'escape' then
-        love.event.quit()
-    end
     if key == "d" and not (snake[1].direction == "sinistra") then
         snake[1].direction = "destra"
     end
