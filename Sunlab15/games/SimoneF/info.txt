@@ -1,0 +1,9 @@
+ROCKET ART
+
+
+
+
+
+	Rocket Art è un gioco singleplayer creato in un corso di programmazione a cui pochi hanno partecipato.
+	Rocket Art è un videogioco in cui consiste di schivare gli ostacoli e arrivare nella buca dove si trovi e il vincitore è colui che avrà il punteggio maggiore.
+	Questo gioco è stato creato con un programma chiamato Visual Studio Code.

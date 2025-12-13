@@ -1,0 +1,4 @@
+Gioca al classico Snake!
+
+Premi P per accedere al menu di pausa e modificare la difficoltá.
+Attenzione a non sbattere nei muri!

@@ -1,0 +1,6 @@
+	Golf 2D è un gioco singleplayer creato da un ragazzo di nome Mathias, è riuscito a creare questo gioco grazie a un corso di programmazione a cui ha partecipato.
+        All'inizio la sua idea originale non era quella di creare un gioco di golf, però sapeva già di voler fare un gioco di sport quindi dopo un pò di riflessione ha pensato:"perché non fare un gioco di golf?"
+        Lo scopo del gioco è riuscire a mandare la palla in buca, tramite la mazza però... sta attento alle buche delle talpe!!! Se per caso finisci in una perderai una pallina, se perdi tre palline sarai Game Over!!
+        Oltre alle talpe devi anche evitare i sassi perché bloccano il passaggio della pallina quindi... prendi bene la mira e manda la palla in buca!!!
+        
+
