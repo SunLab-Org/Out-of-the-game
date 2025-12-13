@@ -131,12 +131,12 @@ function module.update(dt)
         end
 
         if love.keyboard.isDown("i") then 
-            carro2.inclinazione = carro2.inclinazione + 20 * dt
+            carro2.inclinazione = carro2.inclinazione - 20 * dt
             if carro2.inclinazione >= 150 then carro2.inclinazione = 150 end
         end
 
         if love.keyboard.isDown("k") then 
-            carro2.inclinazione = carro2.inclinazione - 20 * dt
+            carro2.inclinazione = carro2.inclinazione + 20 * dt
             if carro2.inclinazione <= 30 then carro2.inclinazione = 30 end
         end
     end
