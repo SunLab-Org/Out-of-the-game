@@ -55,22 +55,22 @@ function module.update(dt)
 
 
     if love.keyboard.isDown("s") then
-        spostamentoy = spostamentoy + 3
+        spostamentoy = spostamentoy + 200 * dt
         spostamentoy = math.min(WINDOW_HEIGHT-88, spostamentoy)
     end
 
     if love.keyboard.isDown("w") then
-        spostamentoy = spostamentoy - 3
+        spostamentoy = spostamentoy - 200 * dt
         spostamentoy = math.max(0, spostamentoy)
     end
 
     if love.keyboard.isDown("a") then
-        spostamentox = spostamentox - 3
+        spostamentox = spostamentox - 200 * dt
         spostamentox = math.max(0, spostamentox)
     end
 
     if love.keyboard.isDown("d") then
-        spostamentox = spostamentox + 3
+        spostamentox = spostamentox + 200 * dt
         spostamentox = math.min(WINDOW_WIDTH-45, spostamentox)
     end 
 
