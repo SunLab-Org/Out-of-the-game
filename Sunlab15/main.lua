@@ -1,3 +1,5 @@
+love.graphics.setDefaultFilter('nearest', 'nearest')
+
 push = require("libs/push") -- Import the push library
 Class = require("libs/class") -- Import the class library
 
