@@ -266,7 +266,7 @@ function drawCredits()
 	love.graphics.printf("Credits", 150, 120, VIRTUAL_WIDTH - 300, "center")
 	love.graphics.setFont(fonts["creditsFont"])
 	love.graphics.printf(
-		"Out of the Game Team: \nEnea, Thomas, Virginia, Raymi, Lorenzo, Gabriele, Simone A, Tommaso, Simone F, Fabio, Alan, Leonardo, Francesco",
+		"Out of the Game Team: \nEnea, Tomas, Virginia, Raymi, Lorenzo, Gabriele, Simone A, Tommaso, Simone F, Fabio, Alan, Mathias, Leonardo, Francesco",
 		150,
 		200,
 		VIRTUAL_WIDTH - 300,
