@@ -1,0 +1,6 @@
+Ciao.
+Sono Fabio e questo è il mio gioco. E' la mia versione di "Space invaders" 
+Si gioca schiacciando solo 3 tasti:
+le frecce per muovere il rettangolino che è la nostra astronave e lo spazio per sparare i colpi.
+Spero che vi diverta.
+Grazie

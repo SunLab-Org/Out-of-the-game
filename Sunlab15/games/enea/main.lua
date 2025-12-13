@@ -1,11 +1,4 @@
-local push = require "push"
--- size of our actual window
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-
--- size we're trying to emulate with push
-VIRTUAL_WIDTH = 600
-VIRTUAL_HEIGHT = 400
+local module = {}
 TIMER = 0
 S_PASSATI = 0
 
@@ -64,25 +57,18 @@ function GenerateQuads(atlas, tilewidth, tileheight)
     return spritesheet
 end
 
-function love.load()
-    music = love.audio.newSource("Hit.wav", "static")
-    music2 = love.audio.newSource("Pickup.wav", "static")
+function module.load()
+    music = love.audio.newSource("games/enea/Hit.wav", "static")
+    music2 = love.audio.newSource("games/enea/Pickup.wav", "static")
 
 
-    love.graphics.setDefaultFilter('nearest', 'nearest')
-    sega_font_large = love.graphics.newFont('font.ttf', 10)
+    sega_font_large = love.graphics.newFont('games/enea/font.ttf', 10)
 
-    snake_img = love.graphics.newImage('realfinal.png')
+    snake_img = love.graphics.newImage('games/enea/realfinal.png')
     images = GenerateQuads(snake_img, 16, 16)
 
     -- initialize our virtual resolution, which will be rendered within our
     -- actual window no matter its dimensions
-    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
-        fullscreen = true,
-        resizable = true,
-        vsync = true,
-        canvas = false
-    })
     math.randomseed(os.time())
     xApple = math.random(290)
     yApple = math.random(190)
@@ -95,9 +81,6 @@ function love.load()
     ypower = ypower - ypower % 16
 end
 
-function love.resize(w, h)
-    push:resize(w, h)
-end
 
 function love.keypressed(key)
     -- add to our table of keys pressed this frame
@@ -121,11 +104,8 @@ function love.keypressed(key)
 
 end
 
-function love.keyboard.wasPressed(key)
-    return love.keyboard.keysPressed[key]
-end
 
-function love.update(dt)
+function module.update(dt)
 if melarossa >= 25 then
     melarossa = 0
 end
@@ -306,9 +286,8 @@ end
 
 -- 1080 / 27 = 40 1920
 -- 1080 y 1920 x
-function love.draw()
+function module.draw()
     -- begin drawing with push, in our virtual resolution
-    push:start()
 
     love.graphics.setColor(0 / 255, 143 / 255, 57 / 255)
     love.graphics.rectangle("fill", 0, 0, 10000, 100000)
@@ -349,10 +328,6 @@ function love.draw()
     text = "highscore: " .. highscore
     love.graphics.print(text, VIRTUAL_WIDTH - 80, 20)
 
-  
-
-    -- end our drawing to push
-    push:finish()
 end
 
 function debug(snake_img, images)
@@ -431,3 +406,5 @@ function drawTail(snake_img, images, x, y, direction)
     end
 
 end
+
+return module
