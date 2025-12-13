@@ -1,0 +1,5 @@
+The classic game of snake frome the Nokia phone and it is better than the other two snake games
+w=up
+a=left
+s=down
+d=right

@@ -1,1 +1,2 @@
-test info raymi
+move with w a s d 
+shoot with space 

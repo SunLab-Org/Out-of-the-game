@@ -2,7 +2,7 @@ local module = {}
 TIMER = 0
 S_PASSATI = 0
 
-STEP  = 0.5
+STEP  = 0.25
 
 local pinteggio = 0
 local y = 0
@@ -175,9 +175,9 @@ S_PASSATI = 0
             ypower = math.random(190)
             xpower = xpower - xpower % 16
             ypower = ypower - ypower % 16
-            STEP = 0.25
+            STEP = 0.125
             if S_PASSATI >= 7 then
-                STEP = 0.5
+                STEP = 0.25
                 
                 
             end
